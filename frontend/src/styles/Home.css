@@ -1,0 +1,6 @@
+
+/* frontend/src/pages/Home.css */
+.home-page { min-height: calc(100vh - 64px); }
+@media (max-width:900px) {
+  .yc-sidebar { display:none; }
+}
