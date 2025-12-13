@@ -18,6 +18,9 @@ export default function Header({ onToggleSidebar }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
+  // mobile search overlay toggle
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+
   const suggestionsRef = useRef(null);
   const inputRef = useRef(null);
   const debounceRef = useRef(null);
@@ -83,6 +86,7 @@ export default function Header({ onToggleSidebar }) {
   const handleSelectSuggestion = (video) => {
     setShowSuggestions(false);
     setQuery("");
+    setShowMobileSearch(false);
     navigate(`/video/${video._id}`);
   };
 
@@ -90,6 +94,7 @@ export default function Header({ onToggleSidebar }) {
     e.preventDefault();
     const q = query.trim();
     setShowSuggestions(false);
+    setShowMobileSearch(false);
     if (!q) return;
     navigate(`/?q=${encodeURIComponent(q)}`);
     setQuery("");
@@ -185,6 +190,7 @@ export default function Header({ onToggleSidebar }) {
       if (e.key === "Escape") {
         setShowSuggestions(false);
         setShowProfileMenu(false);
+        setShowMobileSearch(false);
       }
     }
     document.addEventListener("mousedown", onDocClick);
@@ -231,11 +237,13 @@ export default function Header({ onToggleSidebar }) {
     <>
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
         <div className="w-full px-3 sm:px-4 lg:px-6">
-          <div className="flex items-center h-14">
-            <div className="flex items-center gap-3 min-w-[160px]">
+          <div className="flex items-center gap-3 h-14">
+            {/* left area: burger + logo */}
+            <div className="flex items-center gap-3 min-w-[140px]">
               <button onClick={onToggleSidebar} aria-label="Toggle sidebar" className="p-2 rounded-md hover:bg-gray-100">
                 <svg className="w-5 h-5 text-gray-800" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z"/></svg>
               </button>
+
               <Link to="/" className="flex items-center gap-3 select-none">
                 <svg className="flex-shrink-0 w-8 h-8" viewBox="0 0 24 24" aria-hidden>
                   <rect x="2" y="5" width="20" height="14" rx="3" fill="#FF0000" />
@@ -245,8 +253,10 @@ export default function Header({ onToggleSidebar }) {
               </Link>
             </div>
 
+            {/* center area: search */}
             <div className="relative flex items-center justify-center flex-1 px-2">
-              <form onSubmit={onSearchSubmit} className="w-full max-w-2xl">
+              {/* Desktop & tablet search */}
+              <form onSubmit={onSearchSubmit} className="hidden w-full max-w-2xl sm:block">
                 <div className="flex items-center">
                   <input
                     ref={inputRef}
@@ -266,6 +276,18 @@ export default function Header({ onToggleSidebar }) {
                 </div>
               </form>
 
+              {/* Mobile: small search icon that toggles overlay */}
+              <div className="flex items-center justify-end w-full gap-2 sm:hidden">
+                <button
+                  aria-label="Open search"
+                  onClick={() => { setShowMobileSearch(true); setTimeout(() => inputRef.current?.focus?.(), 0); }}
+                  className="p-2 rounded-full hover:bg-gray-100"
+                >
+                  <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="6" strokeWidth="2"></circle><path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round"></path></svg>
+                </button>
+              </div>
+
+              {/* suggestions container (positioned under search), reused for mobile overlay too */}
               <div ref={suggestionsRef} className="absolute left-0 right-0 z-50 flex justify-center mt-2 pointer-events-none top-full">
                 <div className="w-full max-w-2xl pointer-events-auto">
                   {showSuggestions && (loadingSuggestions || suggestions.length > 0 || noResults) && (
@@ -291,6 +313,7 @@ export default function Header({ onToggleSidebar }) {
               </div>
             </div>
 
+            {/* right area: actions */}
             <div className="flex items-center gap-2 min-w-[140px] justify-end">
               <button aria-label="Notifications" className="relative p-2 rounded-full hover:bg-gray-100 focus:outline-none">
                 <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a6 6 0 00-6 6v4l-2 2v1h16v-1l-2-2V8a6 6 0 00-6-6z"/></svg>
@@ -329,6 +352,53 @@ export default function Header({ onToggleSidebar }) {
           </div>
         </div>
       </header>
+
+      {/* Mobile search overlay (full-width under header) */}
+      {showMobileSearch && (
+        <div className="sm:hidden fixed inset-x-0 top-[56px] z-50 px-3">
+          <div className="w-full max-w-2xl mx-auto">
+            <form onSubmit={onSearchSubmit} className="flex items-center gap-2">
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
+                placeholder="Search"
+                aria-label="Search"
+                className="flex-1 px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-200"
+              />
+              <button type="submit" aria-label="Search" className="px-3 py-2 bg-white border border-gray-200 rounded-full hover:shadow">
+                <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="6" strokeWidth="2"></circle><path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round"></path></svg>
+              </button>
+              <button type="button" onClick={() => { setShowMobileSearch(false); setShowSuggestions(false); }} aria-label="Close search" className="p-2 rounded-full hover:bg-gray-100">
+                <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2" strokeLinecap="round"/></svg>
+              </button>
+            </form>
+            {/* suggestions for mobile overlay will show in the same suggestionsRef area because top-full positions relative to header; but to be safe show them here too */}
+            <div className="mt-2">
+              {showSuggestions && (loadingSuggestions || suggestions.length > 0 || noResults) && (
+                <div className="overflow-hidden bg-white border rounded-lg shadow-lg">
+                  {loadingSuggestions && <div className="p-3 text-sm text-gray-600">Searching...</div>}
+                  {!loadingSuggestions && suggestions.length > 0 && (
+                    <ul>
+                      {suggestions.map((s) => (
+                        <li key={s._id} onClick={() => handleSelectSuggestion(s)} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-50">
+                          <img src={s.thumbnailUrl || s.thumbnail || "https://picsum.photos/seed/default/80/45"} alt={s.title} className="object-cover w-20 h-12 rounded" />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium line-clamp-2">{s.title}</div>
+                            <div className="mt-1 text-xs text-gray-500">{s.uploader?.username || s.channel?.channelName || ""}</div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {!loadingSuggestions && suggestions.length === 0 && noResults && <div className="p-3 text-sm text-gray-600">No results found</div>}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {portalRootRef.current && showProfileMenu && ReactDOM.createPortal(profileMenuContent, portalRootRef.current)}
       {createModalOpen && <CreateChannelModal onClose={() => setCreateModalOpen(false)} />}

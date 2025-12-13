@@ -1,6 +1,118 @@
-
-/* frontend/src/pages/Home.css */
-.home-page { min-height: calc(100vh - 64px); }
-@media (max-width:900px) {
-  .yc-sidebar { display:none; }
+/* frontend/src/styles/Home.css */
+/* Rules from Home.css */
+.home-page {
+  min-height: calc(100vh - 64px);
 }
+
+@media (max-width: 900px) {
+  .yc-sidebar {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .feed-scroll .video-card {
+    width: 100%;
+  }
+}
+
+.feed-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* START: Horizontal Scrollable Filters Fix */
+
+/* Wrapper for the filters and the scroll arrow */
+.filters-wrap {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  
+  /* Make the filter bar stick below the header */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white; /* Ensure the background covers content when scrolling */
+  padding-bottom: 0.5rem;
+  padding-top: 0.5rem; /* Add top padding to lift filters slightly */
+}
+
+/* The scrollable row containing the chip buttons */
+.filters-row {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+  
+  /* KEY FIXES: Prevent wrapping and enable scroll */
+  overflow-x: scroll;
+  white-space: nowrap; /* Prevents chips from breaking to a new line */
+  
+  /* Hide scrollbar on most browsers for a cleaner look */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  padding-bottom: 8px; /* Padding for visual separation */
+}
+
+/* Hide Webkit scrollbar (Chrome, Safari) */
+.filters-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* Chip spacing */
+.filters-row > .chip:not(:last-child) {
+  margin-right: 0.75rem;
+}
+
+/* Chip Button Styling */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  
+  /* KEY FIX: Ensure chips do not shrink */
+  flex-shrink: 0; 
+  
+  background-color: #f2f2f2;
+  color: #0f0f0f;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.chip:hover {
+  background-color: #e5e5e5;
+}
+
+.chip-active {
+  background-color: #0f0f0f;
+  color: white;
+  border-color: #0f0f0f;
+}
+
+.chip-active:hover {
+  background-color: #2c2c2c;
+}
+
+/* Scroll Arrow Button (with fade) */
+.filter-arrow {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  /* Fade effect */
+  background: linear-gradient(to left, white 40%, rgba(255, 255, 255, 0));
+  color: #0f0f0f;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -1rem;
+  box-shadow: -10px 0 10px rgba(255, 255, 255, 0.8);
+}
+/* END: Horizontal Scrollable Filters Fix */
