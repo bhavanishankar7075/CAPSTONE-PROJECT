@@ -1,10 +1,8 @@
-// frontend/src/components/Sidebar.jsx
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "../styles/layout.css";
 import { useSelector } from "react-redux";
 
-/* data arrays (unchanged) */
 const topItems = [
   { key: "shorts", label: "Shorts", icon: (<svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>), to: "/shorts" },
   { key: "subscriptions", label: "Subscriptions", icon: (<svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M10 8v5l6 3v-8"/></svg>), to: "/subscriptions" },
@@ -46,6 +44,9 @@ const settingsLinks = [
 ];
 
 export default function Sidebar({ sidebarOpen = true, onToggleSidebar }) {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+  
   const expanded = !!sidebarOpen;
   const auth = useSelector((s) => s.auth);
   const effectiveUser = auth?.user || (() => {
@@ -55,9 +56,9 @@ export default function Sidebar({ sidebarOpen = true, onToggleSidebar }) {
   const signedIn = !!effectiveUser;
 
   /* -------------------------
-     Extra-large (>=1280px): in-flow sticky sidebar (original behavior)
-     ------------------------- */
-  const DesktopSidebar = (
+       Desktop Sidebar (XL, Pushes content) - Only for Home Page
+       ------------------------- */
+  const DesktopSidebar = isHomePage ? (
     <aside
       className={`app-sidebar bg-white border-r p-4 ${expanded ? "w-72" : "w-20"} transition-all duration-150 hidden xl:block`}
       aria-label="Main sidebar"
@@ -159,16 +160,14 @@ export default function Sidebar({ sidebarOpen = true, onToggleSidebar }) {
         )}
       </div>
     </aside>
-  );
+  ) : null;
 
   /* -------------------------
-     Medium / large (768px - 1279px): tablet & laptop
-     - when closed: show a slim fixed icon rail (doesn't push content)
-     - when open: show fixed overlay drawer with backdrop (overlays content)
-     This covers iPad Pro (1024px) so the drawer overlays instead of pushing videos.
-     ------------------------- */
-  const MediumCompactRail = (
-    <div className="fixed top-0 left-0 z-30 flex-col items-center hidden h-full px-1 py-3 bg-white border-r md:flex xl:hidden w-14">
+       Medium Compact Rail (MD-LG screens, fixed, for Home Page when closed)
+       ------------------------- */
+  const MediumCompactRail = isHomePage && !expanded ? (
+    // Only visible on Home page, when collapsed (MD/LG screens)
+    <div className="fixed top-[var(--header-height)] left-0 z-30 flex-col items-center hidden h-[calc(100vh-var(--header-height))] px-1 py-3 bg-white border-r md:flex xl:hidden w-14 overflow-y-auto">
       <Link to="/" className="p-2 mb-2 rounded hover:bg-gray-100" title="Home">
         <svg className="w-5 h-5 text-gray-800" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       </Link>
@@ -179,14 +178,120 @@ export default function Sidebar({ sidebarOpen = true, onToggleSidebar }) {
       ))}
       <div className="px-1 mt-auto text-xs text-gray-400">Menu</div>
     </div>
-  );
+  ) : null;
 
-  const MediumDrawer = (
-    <div className={`hidden md:block xl:hidden ${expanded ? "fixed inset-0 z-40" : "hidden"}`} aria-hidden={!expanded}>
+  /* -------------------------
+       Universal Drawer (MD/LG/XL screens, Fixed Overlay) - Renders when expanded on non-mobile screens
+      FIX: Added 'xl:hidden' back to the drawer wrapper and used conditional rendering in the return
+      block below to correctly show/hide this drawer for Home/Non-Home on XL screens.
+       ------------------------- */
+  const UniversalDrawer = expanded ? (
+    // hidden on small screens (<md)
+    <div className={`hidden md:block fixed inset-0 z-40`} aria-hidden={!expanded}> 
       <div className="absolute inset-0 bg-black/50" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} />
-      <div className="absolute inset-y-0 left-0 z-50 max-w-full overflow-y-auto bg-white shadow-xl w-72">
+      {/* Drawer content positioned below the header, ensuring it's visible */}
+      <div className="fixed left-0 z-50 max-w-full overflow-y-auto bg-white shadow-xl w-72 top-[var(--header-height)] h-[calc(100vh-var(--header-height))]">
+        
+        {/* Sticky header inside the drawer */}
+        <div className="sticky top-0 z-50 flex items-center justify-between p-4 bg-white border-b"> 
+          <div className="flex items-center gap-3">
+            <svg className="w-7 h-7" viewBox="0 0 24 24" aria-hidden>
+              <rect x="2" y="5" width="20" height="14" rx="3" fill="#FF0000" />
+              <path d="M9.5 8.5v7l6-3.5-6-3.5z" fill="#fff" />
+            </svg>
+            <div className="text-base font-semibold">YouClone</div>
+          </div>
+          <button aria-label="Close menu" className="p-2 rounded-md hover:bg-gray-100" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }}>
+            <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+        </div>
+
+        <nav className="p-4 pt-0 mt-4 space-y-2">
+          <Link to="/" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
+            <div className="p-2 bg-gray-100 rounded-md"><svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
+            <div className="text-sm">Home</div>
+          </Link>
+
+          {topItems.map((it) => (
+            <Link key={it.key} to={it.to} onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
+              <div className="p-2 rounded-md">{it.icon}</div>
+              <div className="text-sm">{it.label}</div>
+            </Link>
+          ))}
+
+          <div className="my-3 border-t" />
+
+          {!signedIn && (
+            <div className="p-3 border rounded-lg">
+              <div className="mb-2 text-sm text-gray-700">Sign in to like videos, comment and subscribe.</div>
+              <Link onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} to="/auth" className="inline-flex items-center gap-2 px-3 py-2 text-sm border rounded">
+                <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z"/></svg>
+                Sign in
+              </Link>
+            </div>
+          )}
+
+          <div className="my-3 border-t" />
+
+          <div>
+            <div className="mb-2 text-sm font-semibold">Explore</div>
+            {explore.map((it) => (
+              <button key={it.key} className="flex items-center w-full gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50">
+                <div className="p-2 rounded-md">{it.icon}</div>
+                <div className="text-sm">{it.label}</div>
+              </button>
+            ))}
+            <button className="flex items-center w-full gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50">
+              <div className="p-2 rounded-md" />
+              <div className="text-sm">Show more</div>
+            </button>
+          </div>
+
+          <div className="my-3 border-t" />
+
+          <div>
+            <div className="mb-2 text-sm font-semibold">More from YouTube</div>
+            {moreFromYT.map((m) => (
+              <div key={m.label} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
+                <div className="flex items-center justify-center bg-white border rounded-md w-9 h-9">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill={m.iconColor}><path d="M10 8v7l6-3.5L10 8z"/></svg>
+                </div>
+                <div className="text-sm">{m.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="my-3 border-t" />
+
+          <div>
+            {settingsLinks.map((s) => (
+              <button key={s.key} className="flex items-center w-full gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50">
+                <div className="p-2 rounded-md">{s.icon}</div>
+                <div className="text-sm">{s.label}</div>
+              </button>
+            ))}
+          </div>
+
+          <div className="pt-3 mt-6 text-xs text-gray-500 border-t">
+            <div className="flex flex-wrap gap-2"><span>About</span><span>Press</span><span>Copyright</span><span>Contact us</span></div>
+            <div className="mt-2">© 2025 YouClone</div>
+          </div>
+        </nav>
+      </div>
+    </div>
+  ) : null;
+
+  /* -------------------------
+       Mobile Drawer (SM screens, Fixed Overlay) - Always renders when expanded
+       ------------------------- */
+  const MobileDrawer = expanded ? (
+    <div className={`fixed inset-0 z-40 md:hidden`} aria-hidden={!expanded}>
+      <div className="absolute inset-0 bg-black/50" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} />
+      {/* Drawer content positioned below the header, ensuring it's visible */}
+      <div className="fixed left-0 z-50 max-w-full overflow-y-auto bg-white shadow-xl w-80 top-[var(--header-height)] h-[calc(100vh-var(--header-height))]">
         <div className="p-4">
-          <div className="flex items-center justify-between">
+          {/* Sticky header inside the drawer */}
+          <div className="sticky top-0 z-50 flex items-center justify-between px-4 pt-0 mb-4 -mx-4 bg-white border-b">
             <div className="flex items-center gap-3">
               <svg className="w-7 h-7" viewBox="0 0 24 24" aria-hidden>
                 <rect x="2" y="5" width="20" height="14" rx="3" fill="#FF0000" />
@@ -199,7 +304,7 @@ export default function Sidebar({ sidebarOpen = true, onToggleSidebar }) {
             </button>
           </div>
 
-          <nav className="mt-4 space-y-2">
+          <nav className="pt-0 mt-4 space-y-2">
             <Link to="/" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
               <div className="p-2 bg-gray-100 rounded-md"><svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
               <div className="text-sm">Home</div>
@@ -273,109 +378,11 @@ export default function Sidebar({ sidebarOpen = true, onToggleSidebar }) {
         </div>
       </div>
     </div>
-  );
+  ) : null;
 
   /* -------------------------
-     Mobile drawer (small screens <768px): overlays content and is controlled by sidebarOpen
-     - fixed inset, backdrop clickable, close button.
-     ------------------------- */
-  const MobileDrawer = (
-    <div className={`fixed inset-0 z-40 md:hidden ${expanded ? "block" : "hidden"}`} aria-hidden={!expanded}>
-      <div className="absolute inset-0 bg-black/50" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} />
-      <div className="absolute inset-y-0 left-0 z-50 max-w-full overflow-y-auto bg-white shadow-xl w-80">
-        <div className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <svg className="w-7 h-7" viewBox="0 0 24 24" aria-hidden>
-                <rect x="2" y="5" width="20" height="14" rx="3" fill="#FF0000" />
-                <path d="M9.5 8.5v7l6-3.5-6-3.5z" fill="#fff" />
-              </svg>
-              <div className="text-base font-semibold">YouClone</div>
-            </div>
-            <button aria-label="Close menu" className="p-2 rounded-md hover:bg-gray-100" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }}>
-              <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </button>
-          </div>
-
-          <nav className="mt-4 space-y-2">
-            <Link to="/" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
-              <div className="p-2 bg-gray-100 rounded-md"><svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
-              <div className="text-sm">Home</div>
-            </Link>
-
-            {topItems.map((it) => (
-              <Link key={it.key} to={it.to} onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
-                <div className="p-2 rounded-md">{it.icon}</div>
-                <div className="text-sm">{it.label}</div>
-              </Link>
-            ))}
-
-            <div className="my-3 border-t" />
-
-            {!signedIn && (
-              <div className="p-3 border rounded-lg">
-                <div className="mb-2 text-sm text-gray-700">Sign in to like videos, comment and subscribe.</div>
-                <Link onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} to="/auth" className="inline-flex items-center gap-2 px-3 py-2 text-sm border rounded">
-                  <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z"/></svg>
-                  Sign in
-                </Link>
-              </div>
-            )}
-
-            <div className="my-3 border-t" />
-
-            <div>
-              <div className="mb-2 text-sm font-semibold">Explore</div>
-              {explore.map((it) => (
-                <button key={it.key} className="flex items-center w-full gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50">
-                  <div className="p-2 rounded-md">{it.icon}</div>
-                  <div className="text-sm">{it.label}</div>
-                </button>
-              ))}
-              <button className="flex items-center w-full gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50">
-                <div className="p-2 rounded-md" />
-                <div className="text-sm">Show more</div>
-              </button>
-            </div>
-
-            <div className="my-3 border-t" />
-
-            <div>
-              <div className="mb-2 text-sm font-semibold">More from YouTube</div>
-              {moreFromYT.map((m) => (
-                <div key={m.label} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
-                  <div className="flex items-center justify-center bg-white border rounded-md w-9 h-9">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill={m.iconColor}><path d="M10 8v7l6-3.5L10 8z"/></svg>
-                  </div>
-                  <div className="text-sm">{m.label}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="my-3 border-t" />
-
-            <div>
-              {settingsLinks.map((s) => (
-                <button key={s.key} className="flex items-center w-full gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50">
-                  <div className="p-2 rounded-md">{s.icon}</div>
-                  <div className="text-sm">{s.label}</div>
-                </button>
-              ))}
-            </div>
-
-            <div className="pt-3 mt-6 text-xs text-gray-500 border-t">
-              <div className="flex flex-wrap gap-2"><span>About</span><span>Press</span><span>Copyright</span><span>Contact us</span></div>
-              <div className="mt-2">© 2025 YouClone</div>
-            </div>
-          </nav>
-        </div>
-      </div>
-    </div>
-  );
-
-  /* -------------------------
-     Mobile bottom nav (quick access) - visible only on small screens (<768px)
-     ------------------------- */
+       Mobile bottom nav (quick access) - visible only on small screens (<768px)
+       ------------------------- */
   const MobileBottomNav = (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t shadow-inner md:hidden" aria-label="Mobile quick nav">
       <div className="max-w-4xl px-2 mx-auto">
@@ -400,13 +407,17 @@ export default function Sidebar({ sidebarOpen = true, onToggleSidebar }) {
     <>
       {DesktopSidebar}
 
-      {/* medium / large: when closed show compact fixed rail (doesn't push layout); when open show overlay drawer */}
-      {!expanded ? MediumCompactRail : MediumDrawer}
+      {MediumCompactRail}
+      
+      {/* Universal Drawer: 
+          1. Renders always when expanded (per logic above).
+          2. We hide it when the DesktopSidebar (the pusher) is supposed to be working (Home + XL screen).
+          3. This ensures that on non-home pages, the drawer appears on MD, LG, and XL.
+      */}
+      {!(isHomePage && !expanded) && UniversalDrawer}
 
-      {/* mobile drawer overlays content (small screens) */}
       {MobileDrawer}
 
-      {/* mobile bottom nav (quick access) */}
       {MobileBottomNav}
     </>
   );
