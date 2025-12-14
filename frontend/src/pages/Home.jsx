@@ -33,8 +33,7 @@ export default function Home() {
   ];
 
   const filtersRef = useRef(null);
-  const feedRef = useRef(null);
-  const containerRef = useRef(null);
+  const scrollContainerRef = useRef(null);
   const filtersWrapRef = useRef(null);
 
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -44,42 +43,30 @@ export default function Home() {
     if (!auth || !auth.user) return;
     dispatch(fetchVideos({ q: qParam || undefined, category }));
   }, [dispatch, qParam, category, auth]);
-
-  useLayoutEffect(() => {
-    function setFeedHeight() {
-      if (!feedRef.current || !containerRef.current) return;
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const available = window.innerHeight - containerRect.top - 16;
-      feedRef.current.style.height = `${Math.max(120, available)}px`;
-    }
-
-    setFeedHeight();
-    window.addEventListener("resize", setFeedHeight);
-    window.addEventListener("orientationchange", setFeedHeight);
-    const ro = new ResizeObserver(setFeedHeight);
-    ro.observe(document.documentElement);
-    return () => {
-      window.removeEventListener("resize", setFeedHeight);
-      window.removeEventListener("orientationchange", setFeedHeight);
-      ro.disconnect();
-    };
-  }, [filtersRef, feedRef]);
-
+  
   // Check scroll position and update arrow visibility
   const updateArrows = () => {
     const el = filtersRef.current;
     const wrapEl = filtersWrapRef.current;
     
+    // Check for mobile screen size (<= 767px)
+    const isMobile = window.innerWidth < 768;
+
     if (!el || !wrapEl) {
       setShowLeftArrow(false);
       setShowRightArrow(false);
-      if (wrapEl) {
-        wrapEl.classList.remove('has-left-arrow', 'has-right-arrow');
-      }
       return;
     }
+    
+    // If on mobile, explicitly hide arrows via state (CSS handles the actual display: none)
+    if (isMobile) {
+        setShowLeftArrow(false);
+        setShowRightArrow(false);
+        wrapEl.classList.remove('has-left-arrow', 'has-right-arrow');
+        return;
+    }
 
-    // Check if content is wider than container (scrollable)
+    // Logic for Desktop/Tablet arrows
     const isScrollable = el.scrollWidth > el.clientWidth + 5;
     
     if (!isScrollable) {
@@ -98,7 +85,7 @@ export default function Home() {
     setShowLeftArrow(showLeft);
     setShowRightArrow(showRight);
     
-    // Update wrapper classes for padding
+    // Update wrapper classes for padding/fade effect
     if (showLeft) {
       wrapEl.classList.add('has-left-arrow');
     } else {
@@ -113,7 +100,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    // Small delay to ensure DOM is ready
     const timer = setTimeout(updateArrows, 50);
 
     const el = filtersRef.current;
@@ -125,6 +111,9 @@ export default function Home() {
     const ro = new ResizeObserver(updateArrows);
     if (filtersRef.current) ro.observe(filtersRef.current);
     
+    // Ensure arrows are updated when component mounts or filters change
+    updateArrows(); 
+
     return () => {
       clearTimeout(timer);
       if (el) {
@@ -182,9 +171,10 @@ export default function Home() {
     </div>
   );
 
+  // Fallback for non-signed in user (Full component scrolling)
   if (!auth || !auth.user) {
     return (
-      <div ref={containerRef} className="p-6 main-content">
+      <div className="h-full p-6 overflow-y-auto">
         {renderFilterBar()}
 
         <div className="flex justify-center mt-12">
@@ -199,8 +189,11 @@ export default function Home() {
     );
   }
 
+  // Main authenticated user content
   return (
-    <div ref={containerRef} className="flex-1 p-6 main-content">
+    // The main scroll container for the video feed.
+    <div className="h-full p-6 overflow-y-auto">
+      
       {renderFilterBar()}
 
       {error && (
@@ -223,11 +216,9 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <div
-          ref={feedRef}
-          className="overflow-auto feed-scroll"
-          style={{ paddingRight: 8 }}
-        >
+        // FIX: The video grid container needs margin to compensate for the filters-wrap negative margins
+        // applied to make the sticky bar full width. This keeps the grid content correctly spaced.
+        <div className="px-6 pb-4 mt-4 -mx-6">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {videos.map((v, idx) => (
               <VideoCard key={v._id} video={v} index={idx} />

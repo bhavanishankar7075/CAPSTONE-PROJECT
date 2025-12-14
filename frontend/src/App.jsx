@@ -15,7 +15,8 @@ export default function App() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
 
-  let mainContentClass = "flex-1 min-h-screen pt-14"; 
+  // Enforce zero horizontal overflow on the main content area
+  let mainContentClass = "flex-1 min-h-screen pt-14 overflow-x-hidden"; 
 
   if (isHomePage) {
     if (sidebarOpen) {
@@ -38,7 +39,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-yc-bg">
       <Header onToggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-      <div className="flex">
+      {/* Set the main flex container to use the full viewport width */}
+      <div className="flex w-full"> 
         <Sidebar sidebarOpen={sidebarOpen} onToggleSidebar={toggleSidebar} /> 
         <main className={mainContentClass}>
           <Routes>
