@@ -55,6 +55,97 @@ export default function Sidebar({ sidebarOpen = true, onToggleSidebar }) {
 
   const signedIn = !!effectiveUser;
 
+  // Reusable Drawer content JSX (without wrapping div)
+  const DrawerContent = () => (
+    <>
+      <div className="sticky top-0 z-50 flex items-center justify-between w-full p-4 bg-white border-b"> 
+        <div className="flex items-center gap-3">
+          <svg className="w-7 h-7" viewBox="0 0 24 24" aria-hidden>
+            <rect x="2" y="5" width="20" height="14" rx="3" fill="#FF0000" />
+            <path d="M9.5 8.5v7l6-3.5-6-3.5z" fill="#fff" />
+          </svg>
+          <div className="text-base font-semibold">YouClone</div>
+        </div>
+        <button aria-label="Close menu" className="p-2 rounded-md hover:bg-gray-100" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }}>
+          <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </button>
+      </div>
+
+      <nav className="p-4 pt-0 mt-4 space-y-2">
+        <Link to="/" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
+          <div className="p-2 bg-gray-100 rounded-md"><svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
+          <div className="text-sm">Home</div>
+        </Link>
+
+        {topItems.map((it) => (
+          <Link key={it.key} to={it.to} onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
+            <div className="p-2 rounded-md">{it.icon}</div>
+            <div className="text-sm">{it.label}</div>
+          </Link>
+        ))}
+
+        <div className="my-3 border-t" />
+
+        {!signedIn && (
+          <div className="p-3 border rounded-lg">
+            <div className="mb-2 text-sm text-gray-700">Sign in to like videos, comment and subscribe.</div>
+            <Link onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} to="/auth" className="inline-flex items-center gap-2 px-3 py-2 text-sm border rounded">
+              <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z"/></svg>
+              Sign in
+            </Link>
+          </div>
+        )}
+
+        <div className="my-3 border-t" />
+
+        <div>
+          <div className="mb-2 text-sm font-semibold">Explore</div>
+          {explore.map((it) => (
+            <button key={it.key} className="flex items-center w-full gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50">
+              <div className="p-2 rounded-md">{it.icon}</div>
+              <div className="text-sm">{it.label}</div>
+            </button>
+          ))}
+          <button className="flex items-center w-full gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50">
+            <div className="p-2 rounded-md" />
+            <div className="text-sm">Show more</div>
+          </button>
+        </div>
+
+        <div className="my-3 border-t" />
+
+        <div>
+          <div className="mb-2 text-sm font-semibold">More from YouTube</div>
+          {moreFromYT.map((m) => (
+            <div key={m.label} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
+              <div className="flex items-center justify-center bg-white border rounded-md w-9 h-9">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill={m.iconColor}><path d="M10 8v7l6-3.5L10 8z"/></svg>
+              </div>
+              <div className="text-sm">{m.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="my-3 border-t" />
+
+        <div>
+          {settingsLinks.map((s) => (
+            <button key={s.key} className="flex items-center w-full gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50">
+              <div className="p-2 rounded-md">{s.icon}</div>
+              <div className="text-sm">{s.label}</div>
+            </button>
+          ))}
+        </div>
+
+        <div className="pt-3 mt-6 text-xs text-gray-500 border-t">
+          <div className="flex flex-wrap gap-2"><span>About</span><span>Press</span><span>Copyright</span><span>Contact us</span></div>
+          <div className="mt-2">© 2025 YouClone</div>
+        </div>
+      </nav>
+    </>
+  );
+
+
   /* -------------------------
        Desktop Sidebar (XL, Pushes content) - Only for Home Page
        ------------------------- */
@@ -81,84 +172,71 @@ export default function Sidebar({ sidebarOpen = true, onToggleSidebar }) {
 
       <div className="my-4 border-t" />
 
-      <div className="space-y-4">
-        {!signedIn && expanded && (
-          <div className="p-3 border rounded-lg">
-            <div className="mb-2 text-sm text-gray-700">Sign in to like videos, comment and subscribe.</div>
-            <Link to="/auth" className="inline-flex items-center gap-2 px-3 py-2 text-sm border rounded">
-              <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z"/></svg>
-              Sign in
-            </Link>
-          </div>
-        )}
-
-        <div className="space-y-2">
-          {moreUser.map((m) => (
-            <Link key={m.key} to={m.to} className="flex items-center gap-4 px-2 py-2 rounded-lg hover:bg-gray-50">
-              <div className="p-2 bg-white border border-transparent rounded-md hover:border-gray-200">{m.icon}</div>
-              {expanded && <div className="text-sm text-gray-700">{m.label}</div>}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      <div className="my-4 border-t" />
-
-      <div className="space-y-3">
-        {expanded && <div className="text-sm font-semibold">Explore</div>}
-        <div className="flex flex-col gap-2">
-          {explore.map((it) => (
-            <button key={it.key} title={it.label} className="flex items-center gap-4 px-2 py-3 text-sm rounded-lg hover:bg-gray-50">
-              <div className="flex items-center justify-center w-10 h-10 bg-white border border-transparent rounded-md hover:border-gray-200">
-                {it.icon}
-              </div>
-              {expanded && <span className="text-gray-700">{it.label}</span>}
-            </button>
-          ))}
-          {expanded && <button className="flex items-center gap-4 px-2 py-3 text-sm rounded-lg hover:bg-gray-50"><div className="w-10 h-10"></div><span>Show more</span></button>}
-        </div>
-      </div>
-
-      <div className="my-4 border-t" />
-
-      <div className="space-y-3">
-        {expanded && <div className="text-sm font-semibold">More from YouTube</div>}
-        {moreFromYT.map((m) => (
-          <div key={m.label} className="flex items-center gap-4 px-2 py-3 rounded-lg hover:bg-gray-50">
-            <div className="flex items-center justify-center w-10 h-10 bg-white border border-transparent rounded-md">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill={m.iconColor}><path d="M10 8v7l6-3.5L10 8z"/></svg>
-            </div>
-            {expanded && <div className="text-sm">{m.label}</div>}
-          </div>
-        ))}
-      </div>
-
-      <div className="my-4 border-t" />
-
-      <div className="space-y-2">
-        {settingsLinks.map((s) => (
-          <button key={s.key} title={s.label} className="flex items-center gap-4 px-2 py-3 text-sm rounded-lg hover:bg-gray-50">
-            <div className="flex items-center justify-center w-10 h-10 bg-white border border-transparent rounded-md">
-              {s.icon}
-            </div>
-            {expanded && <div className="text-sm text-gray-700">{s.label}</div>}
-          </button>
-        ))}
-      </div>
-
-      <div className="pt-4 mt-6 text-xs text-gray-500 border-t">
-        {expanded && (
+      {expanded && (
           <>
-            <div className="flex flex-wrap gap-2">
-              <span>About</span>
-              <span>Press</span>
-              <span>Copyright</span>
-              <span>Contact us</span>
+            <div className="space-y-4">
+              {!signedIn && (
+                <div className="p-3 border rounded-lg">
+                  <div className="mb-2 text-sm text-gray-700">Sign in to like videos, comment and subscribe.</div>
+                  <Link to="/auth" className="inline-flex items-center gap-2 px-3 py-2 text-sm border rounded">
+                    <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z"/></svg>
+                    Sign in
+                  </Link>
+                </div>
+              )}
+              <div className="space-y-2">
+                {moreUser.map((m) => (
+                  <Link key={m.key} to={m.to} className="flex items-center gap-4 px-2 py-2 rounded-lg hover:bg-gray-50">
+                    <div className="p-2 bg-white border border-transparent rounded-md hover:border-gray-200">{m.icon}</div>
+                    <div className="text-sm text-gray-700">{m.label}</div>
+                  </Link>
+                ))}
+              </div>
             </div>
-            <div className="mt-3">© 2025 YouClone</div>
+            <div className="my-4 border-t" />
+            <div className="space-y-3">
+              <div className="text-sm font-semibold">Explore</div>
+              <div className="flex flex-col gap-2">
+                {explore.map((it) => (
+                  <button key={it.key} title={it.label} className="flex items-center gap-4 px-2 py-3 text-sm rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center justify-center w-10 h-10 bg-white border border-transparent rounded-md hover:border-gray-200">
+                      {it.icon}
+                    </div>
+                    <span className="text-gray-700">{it.label}</span>
+                  </button>
+                ))}
+                <button className="flex items-center gap-4 px-2 py-3 text-sm rounded-lg hover:bg-gray-50"><div className="w-10 h-10"></div><span>Show more</span></button>
+              </div>
+            </div>
+            <div className="my-4 border-t" />
+            <div className="space-y-3">
+              <div className="text-sm font-semibold">More from YouTube</div>
+              {moreFromYT.map((m) => (
+                <div key={m.label} className="flex items-center gap-4 px-2 py-3 rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center justify-center w-10 h-10 bg-white border border-transparent rounded-md">
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill={m.iconColor}><path d="M10 8v7l6-3.5L10 8z"/></svg>
+                  </div>
+                  <div className="text-sm">{m.label}</div>
+                </div>
+              ))}
+            </div>
+            <div className="my-4 border-t" />
+            <div className="space-y-2">
+              {settingsLinks.map((s) => (
+                <button key={s.key} title={s.label} className="flex items-center gap-4 px-2 py-3 text-sm rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center justify-center w-10 h-10 bg-white border border-transparent rounded-md">
+                    {s.icon}
+                  </div>
+                  <div className="text-sm text-gray-700">{s.label}</div>
+                </button>
+              ))}
+            </div>
+            <div className="pt-4 mt-6 text-xs text-gray-500 border-t">
+              <div className="flex flex-wrap gap-2"><span>About</span><span>Press</span><span>Copyright</span><span>Contact us</span></div>
+              <div className="mt-3">© 2025 YouClone</div>
+            </div>
           </>
         )}
-      </div>
     </aside>
   ) : null;
 
@@ -181,105 +259,31 @@ export default function Sidebar({ sidebarOpen = true, onToggleSidebar }) {
   ) : null;
 
   /* -------------------------
-       Universal Drawer (MD/LG/XL screens, Fixed Overlay) - Renders when expanded on non-mobile screens
-      FIX: Added 'xl:hidden' back to the drawer wrapper and used conditional rendering in the return
-      block below to correctly show/hide this drawer for Home/Non-Home on XL screens.
+       Universal Drawer (MD/LG screens, Fixed Overlay)
        ------------------------- */
   const UniversalDrawer = expanded ? (
-    // hidden on small screens (<md)
-    <div className={`hidden md:block fixed inset-0 z-40`} aria-hidden={!expanded}> 
+    // Renders on MD, LG screens. Hidden on XL via xl:hidden.
+    <div className={`hidden md:block xl:hidden fixed inset-0 z-40`} aria-hidden={!expanded}> 
       <div className="absolute inset-0 bg-black/50" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} />
       {/* Drawer content positioned below the header, ensuring it's visible */}
       <div className="fixed left-0 z-50 max-w-full overflow-y-auto bg-white shadow-xl w-72 top-[var(--header-height)] h-[calc(100vh-var(--header-height))]">
-        
-        {/* Sticky header inside the drawer */}
-        <div className="sticky top-0 z-50 flex items-center justify-between p-4 bg-white border-b"> 
-          <div className="flex items-center gap-3">
-            <svg className="w-7 h-7" viewBox="0 0 24 24" aria-hidden>
-              <rect x="2" y="5" width="20" height="14" rx="3" fill="#FF0000" />
-              <path d="M9.5 8.5v7l6-3.5-6-3.5z" fill="#fff" />
-            </svg>
-            <div className="text-base font-semibold">YouClone</div>
-          </div>
-          <button aria-label="Close menu" className="p-2 rounded-md hover:bg-gray-100" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }}>
-            <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </button>
-        </div>
-
-        <nav className="p-4 pt-0 mt-4 space-y-2">
-          <Link to="/" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
-            <div className="p-2 bg-gray-100 rounded-md"><svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
-            <div className="text-sm">Home</div>
-          </Link>
-
-          {topItems.map((it) => (
-            <Link key={it.key} to={it.to} onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
-              <div className="p-2 rounded-md">{it.icon}</div>
-              <div className="text-sm">{it.label}</div>
-            </Link>
-          ))}
-
-          <div className="my-3 border-t" />
-
-          {!signedIn && (
-            <div className="p-3 border rounded-lg">
-              <div className="mb-2 text-sm text-gray-700">Sign in to like videos, comment and subscribe.</div>
-              <Link onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} to="/auth" className="inline-flex items-center gap-2 px-3 py-2 text-sm border rounded">
-                <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z"/></svg>
-                Sign in
-              </Link>
-            </div>
-          )}
-
-          <div className="my-3 border-t" />
-
-          <div>
-            <div className="mb-2 text-sm font-semibold">Explore</div>
-            {explore.map((it) => (
-              <button key={it.key} className="flex items-center w-full gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50">
-                <div className="p-2 rounded-md">{it.icon}</div>
-                <div className="text-sm">{it.label}</div>
-              </button>
-            ))}
-            <button className="flex items-center w-full gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50">
-              <div className="p-2 rounded-md" />
-              <div className="text-sm">Show more</div>
-            </button>
-          </div>
-
-          <div className="my-3 border-t" />
-
-          <div>
-            <div className="mb-2 text-sm font-semibold">More from YouTube</div>
-            {moreFromYT.map((m) => (
-              <div key={m.label} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
-                <div className="flex items-center justify-center bg-white border rounded-md w-9 h-9">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill={m.iconColor}><path d="M10 8v7l6-3.5L10 8z"/></svg>
-                </div>
-                <div className="text-sm">{m.label}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="my-3 border-t" />
-
-          <div>
-            {settingsLinks.map((s) => (
-              <button key={s.key} className="flex items-center w-full gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50">
-                <div className="p-2 rounded-md">{s.icon}</div>
-                <div className="text-sm">{s.label}</div>
-              </button>
-            ))}
-          </div>
-
-          <div className="pt-3 mt-6 text-xs text-gray-500 border-t">
-            <div className="flex flex-wrap gap-2"><span>About</span><span>Press</span><span>Copyright</span><span>Contact us</span></div>
-            <div className="mt-2">© 2025 YouClone</div>
-          </div>
-        </nav>
+        <DrawerContent />
       </div>
     </div>
   ) : null;
+
+  /* -------------------------
+       XL Overlay Drawer (XL screens, Fixed Overlay) - ONLY for Non-Home pages.
+       ------------------------- */
+  const XLOverlayDrawer = expanded && !isHomePage ? (
+    <div className={`hidden xl:block fixed inset-0 z-40`} aria-hidden={!expanded}>
+        <div className="absolute inset-0 bg-black/50" onClick={() => { if (typeof onToggleSidebar === "function") onToggleSidebar(); }} />
+        <div className="fixed left-0 z-50 max-w-full overflow-y-auto bg-white shadow-xl w-72 top-[var(--header-height)] h-[calc(100vh-var(--header-height))]">
+            <DrawerContent />
+        </div>
+    </div>
+  ) : null;
+
 
   /* -------------------------
        Mobile Drawer (SM screens, Fixed Overlay) - Always renders when expanded
@@ -405,17 +409,19 @@ export default function Sidebar({ sidebarOpen = true, onToggleSidebar }) {
 
   return (
     <>
+      {/* Pushing Sidebar (Home Page XL) */}
       {DesktopSidebar}
 
+      {/* Fixed Compact Rail (Home Page MD/LG) */}
       {MediumCompactRail}
       
-      {/* Universal Drawer: 
-          1. Renders always when expanded (per logic above).
-          2. We hide it when the DesktopSidebar (the pusher) is supposed to be working (Home + XL screen).
-          3. This ensures that on non-home pages, the drawer appears on MD, LG, and XL.
-      */}
-      {!(isHomePage && !expanded) && UniversalDrawer}
+      {/* Overlay Drawer (MD/LG screens, regardless of route) */}
+      {UniversalDrawer}
 
+      {/* XL Overlay Drawer (ONLY for Non-Home XL pages) */}
+      {XLOverlayDrawer}
+
+      {/* Overlay Drawer (Mobile) */}
       {MobileDrawer}
 
       {MobileBottomNav}

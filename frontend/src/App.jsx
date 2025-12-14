@@ -21,7 +21,7 @@ export default function App() {
   if (isHomePage) {
     if (sidebarOpen) {
       // Home, XL screen, sidebar open (pushing content)
-      mainContentClass += " xl:ml-72 transition-all duration-150"; 
+      mainContentClass += " xl:ml-0 transition-all duration-150"; 
     } else {
       // Home, XL screen, sidebar closed (compact rail pushing content)
       mainContentClass += " xl:ml-20 transition-all duration-150";
