@@ -64,14 +64,21 @@ export const deleteVideo = async (req, res) => {
   try {
     const video = await Video.findById(req.params.id);
     if (!video) return res.status(404).json({ message: "Video not found" });
+
+    // Security check to ensure the uploader is the one deleting the video
     if (String(video.uploader) !== req.user.id) return res.status(403).json({ message: "Not allowed" });
-    await video.remove();
+    await video.deleteOne();
+
+    // Remove video reference from the associated channel
     if (video.channel) await Channel.findByIdAndUpdate(video.channel, { $pull: { videos: video._id } });
+
+    // Delete all associated comments
     await Comment.deleteMany({ videoId: video._id });
+
     res.json({ message: "Video deleted" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error("deleteVideo error:", err); // Added error logging for clarity
+    res.status(500).json({ message: "Server error while deleting video" });
   }
 };
 

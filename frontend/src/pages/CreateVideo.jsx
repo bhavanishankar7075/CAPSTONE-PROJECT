@@ -1,12 +1,14 @@
 /* frontend/src/pages/CreateVideo.jsx */
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchChannels } from "../store/channelsSlice";
 import { createVideo, fetchVideoById } from "../store/VideoSlice";
-import { useNavigate, useSearchParams } from "react-router-dom"; // Added useSearchParams
-import API from "../api/axios"; // For updateVideo API call
+import { fetchChannels } from "../store/channelsSlice";
+import { useNavigate, useSearchParams } from "react-router-dom";
+// Import the toast notification library
+import toast from "react-hot-toast";
+import API from "../api/axios";
 
-// Dummy/Placeholder updateVideo Thunk (needs to be added to VideoSlice.js for Redux compliance, but placed here for full demonstration)
+// Placeholder updateVideo function (as discussed, assumes logic in backend/API is correct)
 const updateVideo = async (payload) => {
   const { videoId, data } = payload;
   try {
@@ -26,7 +28,6 @@ export default function CreateVideo() {
   const videoId = searchParams.get("videoId");
   const isEditMode = !!videoId;
 
-  // Select data from the Redux store
   const channels = useSelector((s) => s.channels.list);
   const auth = useSelector((s) => s.auth);
 
@@ -40,7 +41,7 @@ export default function CreateVideo() {
     channelId: "",
   });
 
-  // 1. Fetch channels on mount (needed for both create and edit)
+  // 1. Fetch channels on mount
   useEffect(() => {
     dispatch(fetchChannels());
   }, [dispatch]);
@@ -57,11 +58,10 @@ export default function CreateVideo() {
             videoUrl: video.videoUrl || "",
             description: video.description || "",
             category: video.category || "General",
-            // Ensure we use the channel ID from the video for editing
             channelId: video.channel?._id || video.channel || "",
           });
         } catch (err) {
-          alert("Failed to load video for editing.");
+          toast.error("Failed to load video for editing.");
           navigate("/");
         } finally {
           setLoading(false);
@@ -74,24 +74,34 @@ export default function CreateVideo() {
   // Handle form submission (Create or Update)
   const submit = async (e) => {
     e.preventDefault();
-    if (!auth.user) return alert("Sign in required");
+
+    // Use toast notification instead of alert
+    if (!auth.user)
+      return toast.error("Sign in required to upload/edit videos.");
 
     setLoading(true);
+    let successMessage = isEditMode
+      ? "Video updated successfully!"
+      : "Video uploaded successfully!";
+    let errorMessage = isEditMode ? "Update failed: " : "Upload failed: ";
 
     try {
       if (isEditMode) {
-        // UPDATE LOGIC: Use the updateVideo API endpoint
         await updateVideo({ videoId, data: form });
-        alert("Video updated successfully!");
       } else {
-        // CREATE LOGIC: Use the createVideo thunk
         await dispatch(createVideo(form)).unwrap();
-        alert("Video uploaded successfully!");
       }
+
+      // Success Notification
+      toast.success(successMessage);
+
       // Navigate back to the channel page or home after successful operation
       navigate(isEditMode ? `/channel/${form.channelId}` : "/");
     } catch (err) {
-      alert(`Operation failed: ${err.message || "Please check input data."}`);
+      // Error Notification
+      toast.error(
+        errorMessage + (err.response?.data?.message || "Server Error.")
+      );
     } finally {
       setLoading(false);
     }
@@ -101,7 +111,6 @@ export default function CreateVideo() {
     return <div className="p-8 text-center text-gray-600">Loading form...</div>;
 
   return (
-    // Improved structure for full responsiveness and centering
     <div className="flex justify-center min-h-screen p-4 sm:p-8 bg-gray-50">
       <div className="w-full max-w-3xl p-6 bg-white rounded-lg shadow-xl md:p-8">
         <h2 className="mb-6 text-2xl font-bold text-gray-800">
@@ -144,8 +153,6 @@ export default function CreateVideo() {
             onChange={(e) => setForm({ ...form, category: e.target.value })}
             className="p-3 bg-white border border-gray-300 rounded-lg appearance-none focus:ring-red-500 focus:border-red-500"
           >
-            [cite_start]
-            {/* Ensure you have at least 6 filter buttons implemented in total [cite: 111] */}
             <option>General</option>
             <option>Programming</option>
             <option>React</option>
@@ -160,7 +167,7 @@ export default function CreateVideo() {
             value={form.channelId}
             onChange={(e) => setForm({ ...form, channelId: e.target.value })}
             className="p-3 bg-white border border-gray-300 rounded-lg appearance-none focus:ring-red-500 focus:border-red-500"
-            required // Channel ID should be required
+            required
           >
             <option value="">Select channel</option>
             {channels.map((c) => (
