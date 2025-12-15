@@ -2,13 +2,18 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchVideoById, likeVideo, dislikeVideo } from "../store/VideoSlice";
-import { fetchComments, addComment, updateComment, deleteComment } from "../store/commentsSlice";
+import {
+  fetchComments,
+  addComment,
+  updateComment,
+  deleteComment,
+} from "../store/commentsSlice";
 import API from "../api/axios";
-// Remove: import "./VideoPlayer.css"; 
+// Remove: import "./VideoPlayer.css";
 
 /**
  * VideoPlayer
- * - Achieves the exact YouTube layout: Content is left-aligned, fills the space immediately 
+ * - Achieves the exact YouTube layout: Content is left-aligned, fills the space immediately
  * after the sidebar, and the "Up next" column sits adjacent without large gaps.
  * * **Final Responsive Fixes Applied (YouTube-Style Alignment):**
  * 1. **Outer Container Fix:** Removed all explicit margins (`md:ml-20 xl:ml-64`) and now uses `pt-4` (for top space) and `pb-14 md:pb-4` to clear the mobile bottom navigation bar.
@@ -66,14 +71,16 @@ export default function VideoPlayer() {
   const isLiked = useMemo(() => {
     if (!video || !currentUserId) return false;
     if (video.userReaction) return video.userReaction === "like";
-    if (Array.isArray(video.likedBy)) return video.likedBy.includes(currentUserId);
+    if (Array.isArray(video.likedBy))
+      return video.likedBy.includes(currentUserId);
     return false;
   }, [video, currentUserId]);
 
   const isDisliked = useMemo(() => {
     if (!video || !currentUserId) return false;
     if (video.userReaction) return video.userReaction === "dislike";
-    if (Array.isArray(video.dislikedBy)) return video.dislikedBy.includes(currentUserId);
+    if (Array.isArray(video.dislikedBy))
+      return video.dislikedBy.includes(currentUserId);
     return false;
   }, [video, currentUserId]);
 
@@ -140,7 +147,10 @@ export default function VideoPlayer() {
   };
 
   const ownerIdOf = (c) => c.userId?._id || c.userId || c.user?._id || c.user;
-  const isCommentOwner = (c) => currentUserId && ownerIdOf(c) && String(currentUserId) === String(ownerIdOf(c));
+  const isCommentOwner = (c) =>
+    currentUserId &&
+    ownerIdOf(c) &&
+    String(currentUserId) === String(ownerIdOf(c));
 
   const removeComment = async (c) => {
     if (!isCommentOwner(c)) return;
@@ -153,12 +163,9 @@ export default function VideoPlayer() {
   if (!video) return <div className="p-4">Loading...</div>;
 
   return (
-    // **OUTER CONTAINER FIX:** Remove redundant ml classes. Apply padding-bottom (pb-14) for mobile nav clearance.
     <div className="py-4 pb-16 md:pb-4">
-      
       {/* Inner Wrapper: Padding only. Allows content to flow full width. */}
       <div className="px-4">
-        
         {/* Grid uses lg:grid-cols-3 (2/3 for video, 1/3 for Up Next). 
             This structure ensures the columns take up the full available width 
             (100% of the space after the left margin, which is handled in App.jsx). */}
@@ -186,8 +193,15 @@ export default function VideoPlayer() {
                   className="rounded-full w-11 h-11"
                 />
                 <div>
-                  <div className="font-medium">{video.uploader?.username || video.channel?.channelName}</div>
-                  <div className="text-xs text-gray-500">{fmtNumber(video.views || 0)} views • {new Date(video.uploadDate || video.createdAt || Date.now()).toLocaleDateString()}</div>
+                  <div className="font-medium">
+                    {video.uploader?.username || video.channel?.channelName}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {fmtNumber(video.views || 0)} views •{" "}
+                    {new Date(
+                      video.uploadDate || video.createdAt || Date.now()
+                    ).toLocaleDateString()}
+                  </div>
                 </div>
               </div>
 
@@ -208,49 +222,108 @@ export default function VideoPlayer() {
                 <button
                   onClick={handleLike}
                   aria-pressed={isLiked}
-                  className={`flex items-center gap-2 px-3 py-1 rounded-full border ${isLiked ? "bg-gray-900 text-white" : "bg-white text-gray-700 hover:bg-gray-50"}`}
+                  className={`flex items-center gap-2 px-3 py-1 rounded-full border ${
+                    isLiked
+                      ? "bg-gray-900 text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
                   title="Like"
                 >
                   {/* thumbs-up icon */}
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <path d="M2 21h4V9H2v12zM22 10c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L13.17 1 7.59 6.59C7.22 6.95 7 7.45 7 8v9c0 1.1.9 2 2 2h7c.83 0 1.54-.5 1.84-1.22L22 10z"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden
+                  >
+                    <path d="M2 21h4V9H2v12zM22 10c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L13.17 1 7.59 6.59C7.22 6.95 7 7.45 7 8v9c0 1.1.9 2 2 2h7c.83 0 1.54-.5 1.84-1.22L22 10z" />
                   </svg>
-                  <span className="text-sm font-medium">{fmtNumber(video.likes || 0)}</span>
+                  <span className="text-sm font-medium">
+                    {fmtNumber(video.likes || 0)}
+                  </span>
                 </button>
 
                 {/* Dislike */}
                 <button
                   onClick={handleDislike}
                   aria-pressed={isDisliked}
-                  className={`flex items-center gap-2 px-3 py-1 rounded-full border ${isDisliked ? "bg-gray-900 text-white" : "bg-white text-gray-700 hover:bg-gray-50"}`}
+                  className={`flex items-center gap-2 px-3 py-1 rounded-full border ${
+                    isDisliked
+                      ? "bg-gray-900 text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
                   title="Dislike"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <path d="M22 3h-4v12h4V3zM2 14c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L10.83 23l5.58-5.59c.37-.36.59-.86.59-1.41V7c0-1.1-.9-2-2-2H7c-.83 0-1.54.5-1.84 1.22L2 14z"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden
+                  >
+                    <path d="M22 3h-4v12h4V3zM2 14c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L10.83 23l5.58-5.59c.37-.36.59-.86.59-1.41V7c0-1.1-.9-2-2-2H7c-.83 0-1.54.5-1.84 1.22L2 14z" />
                   </svg>
-                  <span className="text-sm font-medium">{fmtNumber(video.dislikes || 0)}</span>
+                  <span className="text-sm font-medium">
+                    {fmtNumber(video.dislikes || 0)}
+                  </span>
                 </button>
 
                 {/* Share */}
-                <button title="Share" className="items-center hidden gap-2 px-3 py-1 text-gray-700 bg-white border rounded-full sm:flex hover:bg-gray-50" onClick={() => { navigator.clipboard?.writeText(window.location.href); alert("Link copied"); }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.02-4.11A2.99 2.99 0 1014 5a2.99 2.99 0 001.96.77L9 10.58 7.02 9.38A3.001 3.001 0 1011 7a3 3 0 00-1.96-.77L16.07 10.5c.05.23.09.46.09.7s-.04.47-.09.7L11.04 15.8c.77.44 1.32 1.23 1.32 2.2 0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3c.57 0 1.09.18 1.52.48L17.02 9.4A3 3 0 1018 16.08z"/>
+                <button
+                  title="Share"
+                  className="items-center hidden gap-2 px-3 py-1 text-gray-700 bg-white border rounded-full sm:flex hover:bg-gray-50"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(window.location.href);
+                    alert("Link copied");
+                  }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden
+                  >
+                    <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.02-4.11A2.99 2.99 0 1014 5a2.99 2.99 0 001.96.77L9 10.58 7.02 9.38A3.001 3.001 0 1011 7a3 3 0 00-1.96-.77L16.07 10.5c.05.23.09.46.09.7s-.04.47-.09.7L11.04 15.8c.77.44 1.32 1.23 1.32 2.2 0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3c.57 0 1.09.18 1.52.48L17.02 9.4A3 3 0 1018 16.08z" />
                   </svg>
                   <span className="text-sm font-medium">Share</span>
                 </button>
 
                 {/* Download */}
-                <button title="Download" className="items-center hidden gap-2 px-3 py-1 text-gray-700 bg-white border rounded-full sm:flex hover:bg-gray-50" onClick={() => { /* implement download */ alert("Download not implemented"); }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.92v6h4.5V9h3.92L12 2z"/>
+                <button
+                  title="Download"
+                  className="items-center hidden gap-2 px-3 py-1 text-gray-700 bg-white border rounded-full sm:flex hover:bg-gray-50"
+                  onClick={() => {
+                    /* implement download */ alert("Download not implemented");
+                  }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden
+                  >
+                    <path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.92v6h4.5V9h3.92L12 2z" />
                   </svg>
                   <span className="text-sm font-medium">Download</span>
                 </button>
 
                 {/* Clip */}
-                <button title="Clip" className="items-center hidden gap-2 px-3 py-1 text-gray-700 bg-white border rounded-full sm:flex hover:bg-gray-50" onClick={() => alert("Clip not implemented")}>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <path d="M10 9V5l-7 7 7 7v-4h8V9h-8z"/>
+                <button
+                  title="Clip"
+                  className="items-center hidden gap-2 px-3 py-1 text-gray-700 bg-white border rounded-full sm:flex hover:bg-gray-50"
+                  onClick={() => alert("Clip not implemented")}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden
+                  >
+                    <path d="M10 9V5l-7 7 7 7v-4h8V9h-8z" />
                   </svg>
                   <span className="text-sm font-medium">Clip</span>
                 </button>
@@ -258,7 +331,9 @@ export default function VideoPlayer() {
             </div>
 
             {/* description */}
-            <p className="mt-4 text-sm text-gray-700 whitespace-pre-wrap">{video.description}</p>
+            <p className="mt-4 text-sm text-gray-700 whitespace-pre-wrap">
+              {video.description}
+            </p>
 
             {/* comments */}
             <div className="mt-6">
@@ -266,19 +341,36 @@ export default function VideoPlayer() {
 
               {/* add comment box */}
               <div className="flex items-start gap-3 mt-3">
-                <img src={auth?.user?.avatar || "https://i.pravatar.cc/40"} alt="" className="w-10 h-10 rounded-full" />
+                <img
+                  src={auth?.user?.avatar || "https://i.pravatar.cc/40"}
+                  alt=""
+                  className="w-10 h-10 rounded-full"
+                />
                 <div className="flex-1">
                   <textarea
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     className="w-full p-2 border rounded resize-none"
                     rows={2}
-                    placeholder={auth?.user ? "Add a public comment..." : "Sign in to comment"}
+                    placeholder={
+                      auth?.user
+                        ? "Add a public comment..."
+                        : "Sign in to comment"
+                    }
                     disabled={!auth?.user}
                   />
                   <div className="flex justify-end gap-2 mt-2">
-                    <button onClick={() => setText("")} className="px-4 py-1 border rounded">Cancel</button>
-                    <button onClick={postComment} className="px-4 py-1 text-white bg-black rounded" disabled={!auth?.user || !text.trim()}>
+                    <button
+                      onClick={() => setText("")}
+                      className="px-4 py-1 border rounded"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={postComment}
+                      className="px-4 py-1 text-white bg-black rounded"
+                      disabled={!auth?.user || !text.trim()}
+                    >
                       {commentsLoading ? "Posting..." : "Comment"}
                     </button>
                   </div>
@@ -287,31 +379,82 @@ export default function VideoPlayer() {
 
               {/* comments list */}
               <ul className="mt-4 space-y-3">
-                {comments.length === 0 && <div className="text-sm text-gray-500">No comments yet. Be the first to comment!</div>}
+                {comments.length === 0 && (
+                  <div className="text-sm text-gray-500">
+                    No comments yet. Be the first to comment!
+                  </div>
+                )}
 
-                {comments.map(c => {
+                {comments.map((c) => {
                   const isMy = isCommentOwner(c);
                   return (
                     <li key={c._id} className="p-3 bg-white rounded shadow-sm">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-3">
-                          <img src={c.userId?.avatar || "https://i.pravatar.cc/40"} alt="" className="w-8 h-8 rounded-full" />
+                          <img
+                            src={c.userId?.avatar || "https://i.pravatar.cc/40"}
+                            alt=""
+                            className="w-8 h-8 rounded-full"
+                          />
                           <div>
-                            <div className="text-sm font-medium">{c.userId?.username || c.user?.username || "Unknown"}</div>
-                            <div className="text-xs text-gray-500">{new Date(c.timestamp || c.createdAt || Date.now()).toLocaleString()}</div>
+                            <div className="text-sm font-medium">
+                              {c.userId?.username ||
+                                c.user?.username ||
+                                "Unknown"}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {new Date(
+                                c.timestamp || c.createdAt || Date.now()
+                              ).toLocaleString()}
+                            </div>
                           </div>
                         </div>
 
                         <div className="relative" ref={menuRef}>
-                          <button onClick={() => setMenuOpenId(menuOpenId === c._id ? null : c._id)} className="p-1 rounded hover:bg-gray-100">
-                            <svg className="w-5 h-5 text-gray-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z"/></svg>
+                          <button
+                            onClick={() =>
+                              setMenuOpenId(menuOpenId === c._id ? null : c._id)
+                            }
+                            className="p-1 rounded hover:bg-gray-100"
+                          >
+                            <svg
+                              className="w-5 h-5 text-gray-600"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z" />
+                            </svg>
                           </button>
 
                           {menuOpenId === c._id && (
                             <div className="absolute right-0 z-50 w-48 mt-2 bg-white border rounded shadow-md">
-                              {isMy && <button onClick={() => startEdit(c)} className="block w-full px-3 py-2 text-sm text-left hover:bg-gray-50">Edit</button>}
-                              {isMy && <button onClick={() => removeComment(c)} className="block w-full px-3 py-2 text-sm text-left text-red-600 hover:bg-gray-50">Delete</button>}
-                              <button onClick={() => { navigator.clipboard?.writeText(window.location.href + `#comment-${c._id}`); setMenuOpenId(null); }} className="block w-full px-3 py-2 text-sm text-left hover:bg-gray-50">Copy link</button>
+                              {isMy && (
+                                <button
+                                  onClick={() => startEdit(c)}
+                                  className="block w-full px-3 py-2 text-sm text-left hover:bg-gray-50"
+                                >
+                                  Edit
+                                </button>
+                              )}
+                              {isMy && (
+                                <button
+                                  onClick={() => removeComment(c)}
+                                  className="block w-full px-3 py-2 text-sm text-left text-red-600 hover:bg-gray-50"
+                                >
+                                  Delete
+                                </button>
+                              )}
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard?.writeText(
+                                    window.location.href + `#comment-${c._id}`
+                                  );
+                                  setMenuOpenId(null);
+                                }}
+                                className="block w-full px-3 py-2 text-sm text-left hover:bg-gray-50"
+                              >
+                                Copy link
+                              </button>
                             </div>
                           )}
                         </div>
@@ -320,10 +463,25 @@ export default function VideoPlayer() {
                       <div className="mt-2">
                         {editingId === c._id ? (
                           <div>
-                            <textarea value={editingText} onChange={(e) => setEditingText(e.target.value)} rows={3} className="w-full p-2 border rounded" />
+                            <textarea
+                              value={editingText}
+                              onChange={(e) => setEditingText(e.target.value)}
+                              rows={3}
+                              className="w-full p-2 border rounded"
+                            />
                             <div className="flex justify-end gap-2 mt-2">
-                              <button onClick={cancelEdit} className="px-3 py-1 border rounded">Cancel</button>
-                              <button onClick={() => saveEdit(c)} className="px-3 py-1 text-white bg-black rounded">Save</button>
+                              <button
+                                onClick={cancelEdit}
+                                className="px-3 py-1 border rounded"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => saveEdit(c)}
+                                className="px-3 py-1 text-white bg-black rounded"
+                              >
+                                Save
+                              </button>
                             </div>
                           </div>
                         ) : (
@@ -335,7 +493,6 @@ export default function VideoPlayer() {
                 })}
               </ul>
             </div>
-            
           </div>
 
           {/* right rail - up next: Takes 1/3 of the available space */}
@@ -345,7 +502,11 @@ export default function VideoPlayer() {
               <div className="mt-2 space-y-2">
                 {/* You might want to map over an actual list of related videos here */}
                 <div className="flex items-center gap-2">
-                  <img src={video.thumbnailUrl} alt="" className="object-cover w-24 rounded h-14" />
+                  <img
+                    src={video.thumbnailUrl}
+                    alt=""
+                    className="object-cover w-24 rounded h-14"
+                  />
                   <div className="text-sm line-clamp-2">{video.title}</div>
                 </div>
               </div>
