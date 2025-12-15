@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.js";
 import channelRoutes from "./routes/channels.js";
 import videoRoutes from "./routes/videos.js";
 import commentRoutes from "./routes/comments.js";
+import userRoutes from "./routes/users.js";
 dotenv.config();
 
 const app = express();
@@ -19,6 +20,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/channels", channelRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/", (req, res) => res.json({ message: "YouTube clone API" }));
 

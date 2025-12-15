@@ -1,4 +1,4 @@
-// frontend/src/store/authSlice.js
+ // frontend/src/store/authSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import API from "../api/axios";
 
@@ -73,3 +73,27 @@ const authSlice = createSlice({
 
 export const { logout, setUser } = authSlice.actions;
 export default authSlice.reducer;
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
