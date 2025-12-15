@@ -9,16 +9,8 @@ import {
   deleteComment,
 } from "../store/commentsSlice";
 import API from "../api/axios";
-// Remove: import "./VideoPlayer.css";
 
-/**
- * VideoPlayer
- * - Achieves the exact YouTube layout: Content is left-aligned, fills the space immediately
- * after the sidebar, and the "Up next" column sits adjacent without large gaps.
- * * **Final Responsive Fixes Applied (YouTube-Style Alignment):**
- * 1. **Outer Container Fix:** Removed all explicit margins (`md:ml-20 xl:ml-64`) and now uses `pt-4` (for top space) and `pb-14 md:pb-4` to clear the mobile bottom navigation bar.
- * 2. **Inner Wrapper:** Removed all explicit width constraints (`max-w-7xl`, `mx-auto`, `w-full`), leaving only `px-4`.
- */
+
 
 export default function VideoPlayer() {
   const { id } = useParams();
