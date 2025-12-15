@@ -11,17 +11,17 @@ import CreateVideo from "./pages/CreateVideo";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const toggleSidebar = () => setSidebarOpen(prev => !prev);
+  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
   const location = useLocation();
   const isHomePage = location.pathname === "/";
 
   // Enforce zero horizontal overflow on the main content area
-  let mainContentClass = "flex-1 min-h-screen pt-14 overflow-x-hidden"; 
+  let mainContentClass = "flex-1 min-h-screen pt-14 overflow-x-hidden";
 
   if (isHomePage) {
     if (sidebarOpen) {
       // Home, XL screen, sidebar open (pushing content)
-      mainContentClass += " xl:ml-0 transition-all duration-150"; 
+      mainContentClass += " xl:ml-0 transition-all duration-150";
     } else {
       // Home, XL screen, sidebar closed (compact rail pushing content)
       mainContentClass += " xl:ml-20 transition-all duration-150";
@@ -40,8 +40,8 @@ export default function App() {
     <div className="min-h-screen bg-yc-bg">
       <Header onToggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
       {/* Set the main flex container to use the full viewport width */}
-      <div className="flex w-full"> 
-        <Sidebar sidebarOpen={sidebarOpen} onToggleSidebar={toggleSidebar} /> 
+      <div className="flex w-full">
+        <Sidebar sidebarOpen={sidebarOpen} onToggleSidebar={toggleSidebar} />
         <main className={mainContentClass}>
           <Routes>
             <Route path="/" element={<Home />} />
