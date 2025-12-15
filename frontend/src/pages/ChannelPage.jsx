@@ -398,7 +398,7 @@ export default function ChannelPage() {
           )}
         </div>
       )}
-
+        {/* Creating the new channel  */}
       {createModalOpen && (
         <CreateChannelModal
           onClose={async () => {
