@@ -43,12 +43,12 @@ export default function Home() {
     if (!auth || !auth.user) return;
     dispatch(fetchVideos({ q: qParam || undefined, category }));
   }, [dispatch, qParam, category, auth]);
-  
+
   // Check scroll position and update arrow visibility
   const updateArrows = () => {
     const el = filtersRef.current;
     const wrapEl = filtersWrapRef.current;
-    
+
     // Check for mobile screen size (<= 767px)
     const isMobile = window.innerWidth < 768;
 
@@ -57,22 +57,22 @@ export default function Home() {
       setShowRightArrow(false);
       return;
     }
-    
+
     // If on mobile, explicitly hide arrows via state (CSS handles the actual display: none)
     if (isMobile) {
-        setShowLeftArrow(false);
-        setShowRightArrow(false);
-        wrapEl.classList.remove('has-left-arrow', 'has-right-arrow');
-        return;
+      setShowLeftArrow(false);
+      setShowRightArrow(false);
+      wrapEl.classList.remove("has-left-arrow", "has-right-arrow");
+      return;
     }
 
     // Logic for Desktop/Tablet arrows
     const isScrollable = el.scrollWidth > el.clientWidth + 5;
-    
+
     if (!isScrollable) {
       setShowLeftArrow(false);
       setShowRightArrow(false);
-      wrapEl.classList.remove('has-left-arrow', 'has-right-arrow');
+      wrapEl.classList.remove("has-left-arrow", "has-right-arrow");
       return;
     }
 
@@ -84,18 +84,18 @@ export default function Home() {
 
     setShowLeftArrow(showLeft);
     setShowRightArrow(showRight);
-    
+
     // Update wrapper classes for padding/fade effect
     if (showLeft) {
-      wrapEl.classList.add('has-left-arrow');
+      wrapEl.classList.add("has-left-arrow");
     } else {
-      wrapEl.classList.remove('has-left-arrow');
+      wrapEl.classList.remove("has-left-arrow");
     }
-    
+
     if (showRight) {
-      wrapEl.classList.add('has-right-arrow');
+      wrapEl.classList.add("has-right-arrow");
     } else {
-      wrapEl.classList.remove('has-right-arrow');
+      wrapEl.classList.remove("has-right-arrow");
     }
   };
 
@@ -110,9 +110,9 @@ export default function Home() {
     window.addEventListener("resize", updateArrows);
     const ro = new ResizeObserver(updateArrows);
     if (filtersRef.current) ro.observe(filtersRef.current);
-    
+
     // Ensure arrows are updated when component mounts or filters change
-    updateArrows(); 
+    updateArrows();
 
     return () => {
       clearTimeout(timer);
@@ -142,11 +142,7 @@ export default function Home() {
         </button>
       )}
 
-      <div
-        ref={filtersRef}
-        className="filters-row"
-        aria-label="Categories"
-      >
+      <div ref={filtersRef} className="filters-row" aria-label="Categories">
         {categoryList.map((ch) => (
           <button
             key={ch}
@@ -179,9 +175,12 @@ export default function Home() {
 
         <div className="flex justify-center mt-12">
           <div className="w-full max-w-3xl p-8 text-center bg-white rounded-lg shadow-xl">
-            <h2 className="mb-3 text-2xl font-bold">Try searching to get started</h2>
+            <h2 className="mb-3 text-2xl font-bold">
+              Try searching to get started
+            </h2>
             <p className="text-gray-600">
-              Start watching videos to help us build a feed of videos that you'll love.
+              Start watching videos to help us build a feed of videos that
+              you'll love.
             </p>
           </div>
         </div>
@@ -193,7 +192,6 @@ export default function Home() {
   return (
     // The main scroll container for the video feed.
     <div className="h-full p-6 overflow-y-auto">
-      
       {renderFilterBar()}
 
       {error && (
@@ -209,14 +207,17 @@ export default function Home() {
       ) : !videos || videos.length === 0 ? (
         <div className="flex justify-center">
           <div className="w-full max-w-3xl p-8 text-center bg-white rounded-lg shadow-xl">
-            <h2 className="mb-3 text-2xl font-bold">Try searching to get started</h2>
+            <h2 className="mb-3 text-2xl font-bold">
+              Try searching to get started
+            </h2>
             <p className="text-gray-600">
-              Start watching videos to help us build a feed of videos that you'll love.
+              Start watching videos to help us build a feed of videos that
+              you'll love.
             </p>
           </div>
         </div>
       ) : (
-        // FIX: The video grid container needs margin to compensate for the filters-wrap negative margins
+        // Video Grid Section 
         // applied to make the sticky bar full width. This keeps the grid content correctly spaced.
         <div className="px-6 pb-4 mt-4 -mx-6">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
