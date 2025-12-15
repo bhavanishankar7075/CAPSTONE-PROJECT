@@ -40,9 +40,15 @@ export default function CreateChannelModal({ onClose }) {
   const navigate = useNavigate();
 
   const auth = useSelector((s) => s.auth);
-  const me = auth?.user || (() => {
-    try { return JSON.parse(localStorage.getItem("user") || "null"); } catch { return null; }
-  })();
+  const me =
+    auth?.user ||
+    (() => {
+      try {
+        return JSON.parse(localStorage.getItem("user") || "null");
+      } catch {
+        return null;
+      }
+    })();
 
   const initialName = me?.username ? `${me.username}'s Channel` : "";
   const [channelName, setChannelName] = useState(initialName);
@@ -95,7 +101,11 @@ export default function CreateChannelModal({ onClose }) {
       // If backend returned a user object, normalize and store it
       if (data?.user) {
         const normalized = normalizeUserChannels(data.user);
-        try { localStorage.setItem("user", JSON.stringify(normalized)); } catch (e) { /* ignore */ }
+        try {
+          localStorage.setItem("user", JSON.stringify(normalized));
+        } catch (e) {
+          /* ignore */
+        }
         dispatch(setUser(normalized));
       } else if (data?.channel && me) {
         // fallback: update localStorage manually
@@ -104,10 +114,18 @@ export default function CreateChannelModal({ onClose }) {
           if (stored) {
             stored.channels = stored.channels || [];
             // ensure channels are id strings
-            stored.channels = stored.channels.map((c) => (typeof c === "string" ? c : (c?._id || c?.id || null))).filter(Boolean);
-            if (!stored.channels.find((c) => String(c) === String(data.channel._id))) {
+            stored.channels = stored.channels
+              .map((c) => (typeof c === "string" ? c : c?._id || c?.id || null))
+              .filter(Boolean);
+            if (
+              !stored.channels.find(
+                (c) => String(c) === String(data.channel._id)
+              )
+            ) {
               stored.channels.unshift(data.channel._id);
-              try { localStorage.setItem("user", JSON.stringify(stored)); } catch (e) {}
+              try {
+                localStorage.setItem("user", JSON.stringify(stored));
+              } catch (e) {}
               dispatch(setUser(stored));
             } else {
               // still update setUser in case other fields changed
@@ -129,7 +147,11 @@ export default function CreateChannelModal({ onClose }) {
       if (newChannelId) navigate(`/channel/${newChannelId}`);
     } catch (err) {
       console.error("create channel failed", err);
-      alert(err?.message || (err?.payload && JSON.stringify(err.payload)) || "Failed to create channel");
+      alert(
+        err?.message ||
+          (err?.payload && JSON.stringify(err.payload)) ||
+          "Failed to create channel"
+      );
     } finally {
       setLoading(false);
     }
@@ -146,7 +168,9 @@ export default function CreateChannelModal({ onClose }) {
       {/* backdrop */}
       <div
         className="absolute inset-0 transition-opacity bg-black/50"
-        onClick={() => { if (!loading && onClose) onClose(); }}
+        onClick={() => {
+          if (!loading && onClose) onClose();
+        }}
         aria-hidden="true"
       />
 
@@ -158,7 +182,10 @@ export default function CreateChannelModal({ onClose }) {
         {/* header */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 id="create-channel-title" className="text-lg font-semibold leading-tight sm:text-2xl">
+            <h2
+              id="create-channel-title"
+              className="text-lg font-semibold leading-tight sm:text-2xl"
+            >
               How you'll appear
             </h2>
             <p className="mt-1 text-xs text-gray-500 sm:text-sm max-w-prose">
@@ -169,13 +196,25 @@ export default function CreateChannelModal({ onClose }) {
           {/* close button */}
           <button
             type="button"
-            onClick={() => { if (!loading && onClose) onClose(); }}
+            onClick={() => {
+              if (!loading && onClose) onClose();
+            }}
             aria-label="Close create channel modal"
             className="p-2 transition rounded-md hover:bg-gray-100 active:scale-95"
             disabled={loading}
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-5 h-5 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -188,7 +227,9 @@ export default function CreateChannelModal({ onClose }) {
               <img
                 src={
                   avatarPreview ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(me?.username || "User")}&background=0D8ABC&color=fff`
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    me?.username || "User"
+                  )}&background=0D8ABC&color=fff`
                 }
                 alt="avatar preview"
                 className="object-cover w-full h-full"
@@ -204,7 +245,13 @@ export default function CreateChannelModal({ onClose }) {
               >
                 Select picture
               </button>
-              <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
               <p className="mt-2 text-xs text-gray-400 text-center max-w-[10rem] sm:max-w-xs">
                 Avatar is local preview only (no upload in this modal).
               </p>
@@ -226,13 +273,19 @@ export default function CreateChannelModal({ onClose }) {
               <label className="block text-sm text-gray-700">Handle</label>
               <input
                 className="w-full p-3 mt-2 text-gray-700 border rounded-lg bg-gray-50"
-                value={me?.username ? `@${String(me.username).replace(/\s+/g, "")}` : ""}
+                value={
+                  me?.username
+                    ? `@${String(me.username).replace(/\s+/g, "")}`
+                    : ""
+                }
                 readOnly
               />
             </div>
 
             <div className="mt-4 text-sm text-gray-500">
-              By clicking <span className="font-medium">Create channel</span> you agree to the project rules. This modal is a simplified UI for the capstone.
+              By clicking <span className="font-medium">Create channel</span>{" "}
+              you agree to the project rules. This modal is a simplified UI for
+              the capstone.
             </div>
           </div>
         </div>
@@ -240,7 +293,9 @@ export default function CreateChannelModal({ onClose }) {
         {/* actions - responsive */}
         <div className="flex flex-col-reverse items-center gap-3 mt-6 sm:mt-8 sm:flex-row sm:justify-end">
           <button
-            onClick={() => { if (!loading && onClose) onClose(); }}
+            onClick={() => {
+              if (!loading && onClose) onClose();
+            }}
             className="w-full px-4 py-2 transition bg-white border rounded-lg sm:w-auto hover:bg-gray-50 disabled:opacity-60"
             disabled={loading}
           >
