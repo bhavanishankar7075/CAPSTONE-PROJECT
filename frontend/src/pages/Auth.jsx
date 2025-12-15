@@ -65,7 +65,10 @@ export default function Auth() {
     try {
       if (isLogin) {
         const res = await dispatch(
-          login({ emailOrUsername: form.emailOrUsername || form.email, password: form.password })
+          login({
+            emailOrUsername: form.emailOrUsername || form.email,
+            password: form.password,
+          })
         );
         if (res.type && res.type.endsWith("fulfilled")) {
           navigate("/");
@@ -75,7 +78,13 @@ export default function Auth() {
           setSubmitError(err.message || "Sign in failed. Check credentials.");
         }
       } else {
-        const res = await dispatch(register({ username: form.username.trim(), email: form.email.trim(), password: form.password }));
+        const res = await dispatch(
+          register({
+            username: form.username.trim(),
+            email: form.email.trim(),
+            password: form.password,
+          })
+        );
         if (res.type && res.type.endsWith("fulfilled")) {
           // successful register -> switch to login with message
           setIsLogin(true);
@@ -95,12 +104,16 @@ export default function Auth() {
   return (
     <div className="min-h-[80vh] flex items-start justify-center py-12 px-4 bg-gray-50">
       <div className="w-full max-w-md p-6 bg-white rounded shadow">
-        <h2 className="mb-4 text-2xl font-semibold text-gray-900">{isLogin ? "Sign in" : "Create account"}</h2>
+        <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+          {isLogin ? "Sign in" : "Create account"}
+        </h2>
 
         {/* Server / submit error */}
         {submitError || auth.error ? (
           <div className="p-3 mb-3 text-sm text-red-700 border border-red-100 rounded bg-red-50">
-            {submitError || (auth.error && (auth.error.message || JSON.stringify(auth.error)))}
+            {submitError ||
+              (auth.error &&
+                (auth.error.message || JSON.stringify(auth.error)))}
           </div>
         ) : null}
 
@@ -112,10 +125,16 @@ export default function Auth() {
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
                 placeholder="Choose a username"
-                className={`p-3 border rounded focus:outline-none ${fieldErrors.username ? "border-red-400" : "border-gray-200"}`}
+                className={`p-3 border rounded focus:outline-none ${
+                  fieldErrors.username ? "border-red-400" : "border-gray-200"
+                }`}
                 aria-invalid={!!fieldErrors.username}
               />
-              {fieldErrors.username && <div className="text-xs text-red-600">{fieldErrors.username}</div>}
+              {fieldErrors.username && (
+                <div className="text-xs text-red-600">
+                  {fieldErrors.username}
+                </div>
+              )}
             </>
           )}
 
@@ -126,10 +145,14 @@ export default function Auth() {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="Email address"
-                className={`p-3 border rounded focus:outline-none ${fieldErrors.email ? "border-red-400" : "border-gray-200"}`}
+                className={`p-3 border rounded focus:outline-none ${
+                  fieldErrors.email ? "border-red-400" : "border-gray-200"
+                }`}
                 aria-invalid={!!fieldErrors.email}
               />
-              {fieldErrors.email && <div className="text-xs text-red-600">{fieldErrors.email}</div>}
+              {fieldErrors.email && (
+                <div className="text-xs text-red-600">{fieldErrors.email}</div>
+              )}
             </>
           )}
 
@@ -138,12 +161,22 @@ export default function Auth() {
               <label className="text-sm text-gray-700">Email or Username</label>
               <input
                 value={form.emailOrUsername}
-                onChange={(e) => setForm({ ...form, emailOrUsername: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, emailOrUsername: e.target.value })
+                }
                 placeholder="Email or username"
-                className={`p-3 border rounded focus:outline-none ${fieldErrors.emailOrUsername ? "border-red-400" : "border-gray-200"}`}
+                className={`p-3 border rounded focus:outline-none ${
+                  fieldErrors.emailOrUsername
+                    ? "border-red-400"
+                    : "border-gray-200"
+                }`}
                 aria-invalid={!!fieldErrors.emailOrUsername}
               />
-              {fieldErrors.emailOrUsername && <div className="text-xs text-red-600">{fieldErrors.emailOrUsername}</div>}
+              {fieldErrors.emailOrUsername && (
+                <div className="text-xs text-red-600">
+                  {fieldErrors.emailOrUsername}
+                </div>
+              )}
             </>
           )}
 
@@ -153,17 +186,27 @@ export default function Auth() {
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             placeholder="Password"
-            className={`p-3 border rounded focus:outline-none ${fieldErrors.password ? "border-red-400" : "border-gray-200"}`}
+            className={`p-3 border rounded focus:outline-none ${
+              fieldErrors.password ? "border-red-400" : "border-gray-200"
+            }`}
             aria-invalid={!!fieldErrors.password}
           />
-          {fieldErrors.password && <div className="text-xs text-red-600">{fieldErrors.password}</div>}
+          {fieldErrors.password && (
+            <div className="text-xs text-red-600">{fieldErrors.password}</div>
+          )}
 
           <button
             type="submit"
             className="py-2 mt-1 text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none disabled:opacity-60"
             disabled={auth.loading}
           >
-            {auth.loading ? (isLogin ? "Signing in..." : "Registering...") : (isLogin ? "Sign in" : "Register")}
+            {auth.loading
+              ? isLogin
+                ? "Signing in..."
+                : "Registering..."
+              : isLogin
+              ? "Sign in"
+              : "Register"}
           </button>
         </form>
 
