@@ -1,12 +1,20 @@
-// frontend/src/components/Header.jsx
 import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
 import ReactDOM from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout as logoutAction, setUser } from "../store/authSlice";
+import { logout as logoutAction } from "../store/authSlice";
 import { clearVideos } from "../store/VideoSlice";
 import API from "../api/axios";
 import CreateChannelModal from "./CreateChannelModal";
+
+// Function to get initials or default
+function getInitials(user) {
+  const username = user?.username;
+  if (username && typeof username === "string" && username.length > 0) {
+    return username.charAt(0).toUpperCase();
+  }
+  return "U"; // Default initial
+}
 
 export default function Header({ onToggleSidebar }) {
   const [query, setQuery] = useState("");
@@ -34,6 +42,7 @@ export default function Header({ onToggleSidebar }) {
   const navigate = useNavigate();
   const auth = useSelector((s) => s.auth);
 
+  // Use state data first, then localStorage fallback
   const effectiveUser =
     auth?.user ||
     (() => {
@@ -130,9 +139,6 @@ export default function Header({ onToggleSidebar }) {
     setShowSuggestions(false);
     setSuggestions([]);
     setQuery("");
-    try {
-      dispatch(setUser(null));
-    } catch (e) {}
     navigate("/");
   };
 
@@ -244,20 +250,25 @@ export default function Header({ onToggleSidebar }) {
         {effectiveUser ? "Your channel / Profile" : "Sign in"}
       </button>
 
-      <button
-        onClick={openCreateFromMenu}
-        className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50"
-      >
-        Create channel
-      </button>
+      {/* Only show Create channel if logged in */}
+      {isLoggedIn && (
+        <button
+          onClick={openCreateFromMenu}
+          className="w-full px-4 py-2 text-sm text-left hover:bg-gray-50"
+        >
+          Create channel
+        </button>
+      )}
 
-      <Link
-        to="/settings"
-        onClick={() => setShowProfileMenu(false)}
-        className="block px-4 py-2 text-sm hover:bg-gray-50"
-      >
-        Settings
-      </Link>
+      {isLoggedIn && (
+        <Link
+          to="/settings"
+          onClick={() => setShowProfileMenu(false)}
+          className="block px-4 py-2 text-sm hover:bg-gray-50"
+        >
+          Settings
+        </Link>
+      )}
       <Link
         to="/help"
         onClick={() => setShowProfileMenu(false)}
@@ -266,14 +277,18 @@ export default function Header({ onToggleSidebar }) {
         Help
       </Link>
 
-      <div className="my-1 border-t" />
+      {isLoggedIn && (
+        <>
+          <div className="my-1 border-t" />
 
-      <button
-        onClick={handleSignOut}
-        className="w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-gray-50"
-      >
-        Sign out
-      </button>
+          <button
+            onClick={handleSignOut}
+            className="w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-gray-50"
+          >
+            Sign out
+          </button>
+        </>
+      )}
     </div>
   );
 
@@ -463,21 +478,23 @@ export default function Header({ onToggleSidebar }) {
 
             {/* right area: actions */}
             <div className="flex items-center gap-2 min-w-[140px] justify-end">
-              <button
-                aria-label="Notifications"
-                className="relative p-2 rounded-full hover:bg-gray-100 focus:outline-none"
-              >
-                <svg
-                  className="w-5 h-5 text-gray-700"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
+              {isLoggedIn && (
+                <button
+                  aria-label="Notifications"
+                  className="relative p-2 rounded-full hover:bg-gray-100 focus:outline-none"
                 >
-                  <path d="M12 2a6 6 0 00-6 6v4l-2 2v1h16v-1l-2-2V8a6 6 0 00-6-6z" />
-                </svg>
-                <span className="hidden sm:inline absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1 rounded-full">
-                  3
-                </span>
-              </button>
+                  <svg
+                    className="w-5 h-5 text-gray-700"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 2a6 6 0 00-6 6v4l-2 2v1h16v-1l-2-2V8a6 6 0 00-6-6z" />
+                  </svg>
+                  <span className="hidden sm:inline absolute -top-1 -right-1 bg-red-600 text-white text-[10px] px-1 rounded-full">
+                    3
+                  </span>
+                </button>
+              )}
 
               {isLoggedIn ? (
                 <>
@@ -503,13 +520,17 @@ export default function Header({ onToggleSidebar }) {
                       title="Profile"
                       className="p-0 rounded-full focus:outline-none"
                     >
-                      <img
-                        src={
-                          effectiveUser?.avatar || "https://i.pravatar.cc/40"
-                        }
-                        alt="Avatar"
-                        className="object-cover w-8 h-8 border rounded-full"
-                      />
+                      {effectiveUser?.avatar ? (
+                        <img
+                          src={effectiveUser.avatar}
+                          alt="Avatar"
+                          className="object-cover w-8 h-8 border rounded-full"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center w-8 h-8 font-semibold text-white bg-gray-500 border rounded-full text-md">
+                          {getInitials(effectiveUser)}
+                        </div>
+                      )}
                     </button>
                   </div>
                 </>

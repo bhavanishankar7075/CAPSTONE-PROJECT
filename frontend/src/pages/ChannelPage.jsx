@@ -4,16 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchChannelById } from "../store/channelsSlice";
 import API from "../api/axios";
 import CreateChannelModal from "../components/CreateChannelModal";
-import { setUser } from "../store/authSlice";
-
-/**
- * ChannelPage (robust)
- * - normalizes channel ids (strings or populated objects)
- * - refreshes user from backend to avoid re-opening create modal on reload
- * - safe three-dots menu per video with outside click close
- * - ensures dropdowns are visible (parent containers use overflow-visible)
- * - scrolls to top on mount so header dropdown renders below header
- */
+import { fetchMe } from "../store/authSlice";
 
 function extractChannelId(maybe) {
   if (!maybe) return null;
@@ -22,7 +13,6 @@ function extractChannelId(maybe) {
   return null;
 }
 
-// Inline Modal Component for Delete Confirmation
 const DeleteConfirmationModal = ({ videoId, onClose, onConfirm, loading }) => (
   <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-50 transition-opacity">
     <div className="w-11/12 max-w-md p-6 mx-auto transition-all transform bg-white rounded-lg shadow-2xl">
@@ -68,8 +58,9 @@ export default function ChannelPage() {
   const [sortBy, setSortBy] = useState("Latest");
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [openMenuFor, setOpenMenuFor] = useState(null);
-  // New state for delete confirmation modal
   const [videoToDeleteId, setVideoToDeleteId] = useState(null);
+
+  const token = localStorage.getItem("token");
 
   const localUser = React.useMemo(() => {
     try {
@@ -79,30 +70,23 @@ export default function ChannelPage() {
     }
   }, []);
 
-  const effectiveUser = auth?.user || localUser;
+  const effectiveUser = auth.user || localUser;
 
   const firstChannelEntry =
     effectiveUser?.channels?.[0] || effectiveUser?.channelId || null;
-  const normalizedFirstChannelId = extractChannelId(firstChannelEntry);
-  const resolvedId = paramId || normalizedFirstChannelId || null;
+  const resolvedId = paramId || extractChannelId(firstChannelEntry) || null;
 
   useEffect(() => {
-    function onDocClick(e) {
-      if (!e.target.closest("[data-menu]")) {
-        setOpenMenuFor(null);
-      }
+    if (token && !auth.user) {
+      dispatch(fetchMe());
     }
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, []);
+  }, [token, auth.user, dispatch]);
 
   useEffect(() => {
     let cancelled = false;
 
-    const tryRefreshUserAndChannel = async () => {
-      try {
-        window.scrollTo({ top: 0, behavior: "auto" });
-      } catch {}
+    const init = async () => {
+      window.scrollTo({ top: 0, behavior: "auto" });
 
       if (resolvedId) {
         dispatch(fetchChannelById(resolvedId));
@@ -110,49 +94,25 @@ export default function ChannelPage() {
         return;
       }
 
-      if (!effectiveUser) {
+      if (!token) {
         navigate("/auth");
         return;
       }
 
-      if (effectiveUser?._id) {
-        try {
-          const res = await API.get(`/users/${effectiveUser._id}`);
-          const freshUser = res.data?.user ?? res.data;
-          if (!cancelled && freshUser) {
-            const normalized = { ...freshUser };
-            if (Array.isArray(normalized.channels)) {
-              normalized.channels = normalized.channels
-                .map((c) => extractChannelId(c))
-                .filter(Boolean);
-            }
-
-            dispatch(setUser(normalized));
-            localStorage.setItem("user", JSON.stringify(normalized));
-
-            const newId =
-              normalized.channels?.[0] || normalized.channelId || null;
-            if (newId) {
-              await dispatch(fetchChannelById(newId));
-              setCreateModalOpen(false);
-              return;
-            }
-          }
-        } catch {}
-      }
+      if (!effectiveUser) return;
 
       if (!cancelled) setCreateModalOpen(true);
     };
 
-    tryRefreshUserAndChannel();
+    init();
     return () => {
       cancelled = true;
     };
-  }, [dispatch, resolvedId, effectiveUser, navigate]);
+  }, [dispatch, resolvedId, effectiveUser, navigate, token]);
 
   const isOwner = useMemo(() => {
     if (!effectiveUser || !channel) return false;
-    const userId = effectiveUser._id || effectiveUser.id || effectiveUser;
+    const userId = effectiveUser._id || effectiveUser.id;
     const ownerId = channel.owner?._id || channel.owner;
     return String(userId) === String(ownerId);
   }, [effectiveUser, channel]);
@@ -161,22 +121,32 @@ export default function ChannelPage() {
     if (!channel?.videos) return [];
     const arr = [...channel.videos];
     if (sortBy === "Latest") {
-      arr.sort(
-        (a, b) =>
-          new Date(b.uploadDate || b.createdAt || 0) -
-          new Date(a.uploadDate || a.createdAt || 0)
-      );
+      arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } else if (sortBy === "Oldest") {
-      arr.sort(
-        (a, b) =>
-          new Date(a.uploadDate || a.createdAt || 0) -
-          new Date(b.uploadDate || b.createdAt || 0)
-      );
+      arr.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     } else if (sortBy === "Popular") {
       arr.sort((a, b) => (b.views || 0) - (a.views || 0));
     }
     return arr;
   }, [channel?.videos, sortBy]);
+
+  const handleDeleteClick = (vidId) => {
+    setVideoToDeleteId(vidId);
+    setOpenMenuFor(null);
+  };
+
+  const handleDeleteConfirm = async (vidId) => {
+    setLoadingDelete(vidId);
+    setVideoToDeleteId(null);
+    try {
+      await API.delete(`/videos/${vidId}`);
+      if (resolvedId) dispatch(fetchChannelById(resolvedId));
+    } catch (err) {
+      alert("Delete failed");
+    } finally {
+      setLoadingDelete(null);
+    }
+  };
 
   const fmtNumber = (n) => {
     if (n == null) return "0";
@@ -185,38 +155,11 @@ export default function ChannelPage() {
     return `${n}`;
   };
 
-  // Function to open the confirmation modal
-  const handleDeleteClick = (vidId) => {
-    setVideoToDeleteId(vidId);
-    setOpenMenuFor(null); // Close the options menu
-  };
-
-  // Original delete logic, now called after confirmation
-  const handleDeleteConfirm = async (vidId) => {
-    setLoadingDelete(vidId);
-    setVideoToDeleteId(null); // Close modal right away
-    try {
-      await API.delete(`/videos/${vidId}`);
-      // Re-fetch the channel data to update the video list
-      if (resolvedId) await dispatch(fetchChannelById(resolvedId));
-    } catch (err) {
-      alert(err?.response?.data?.message || "Delete failed");
-    } finally {
-      setLoadingDelete(null);
-    }
-  };
-
   const openCreateModal = () => setCreateModalOpen(true);
 
   if (!channel && resolvedId) {
     return (
-      <div className="min-h-screen bg-yc-bg">
-        <div className="max-w-[1200px] mx-auto p-6">
-          <div className="py-24 text-center text-gray-600">
-            Loading channel...
-          </div>
-        </div>
-      </div>
+      <div className="py-24 text-center text-gray-600">Loading channel...</div>
     );
   }
 
