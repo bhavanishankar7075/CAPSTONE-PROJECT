@@ -1,5 +1,5 @@
 
-# 🎬 YouClone – Full Stack YouTube Clone
+#  YouClone – Full Stack YouTube Clone
 
 A **full-stack YouTube-like video streaming platform** built using **MERN stack** (MongoDB, Express, React, Node.js) with modern UI and real-world features such as authentication, channels, videos, comments, likes, search, filters, and responsive design.
 
@@ -7,9 +7,9 @@ This project is built as a **capstone-level real-world application**, closely mi
 
 ---
 
-## 🚀 Live Features Overview
+##  Live Features Overview
 
-### 🔐 Authentication
+###  Authentication
 
 * User signup & login
 * JWT-based authentication
@@ -18,7 +18,7 @@ This project is built as a **capstone-level real-world application**, closely mi
 
 ---
 
-### 🏠 Home Page
+###  Home Page
 
 * Displays videos only when user is signed in
 * Logged-out users see:
@@ -31,7 +31,7 @@ This project is built as a **capstone-level real-world application**, closely mi
 
 ---
 
-### 🔍 Search & Filter
+###  Search & Filter
 
 * Search bar in header
 * Live dropdown suggestions while typing
@@ -45,7 +45,7 @@ This project is built as a **capstone-level real-world application**, closely mi
 
 ---
 
-### 🎥 Video Player Page
+###  Video Player Page
 
 * Video player
 * Title, views, upload date
@@ -63,7 +63,7 @@ This project is built as a **capstone-level real-world application**, closely mi
 
 ---
 
-### 💬 Comments System
+###  Comments System
 
 * Backend-connected comments
 * Each comment linked to:
@@ -77,7 +77,7 @@ This project is built as a **capstone-level real-world application**, closely mi
 
 ---
 
-### 📺 Channel System
+###  Channel System
 
 * Create channel (only after login)
 * Each user can have **one channel**
@@ -94,7 +94,7 @@ This project is built as a **capstone-level real-world application**, closely mi
 
 ---
 
-### 👤 Profile / Channel Access
+###  Profile / Channel Access
 
 * Header profile avatar only (no username text)
 * Clicking avatar opens menu:
@@ -111,7 +111,7 @@ This project is built as a **capstone-level real-world application**, closely mi
 
 ---
 
-### 🎞️ Channel Videos
+###  Channel Videos
 
 * Channel page lists only that channel’s videos
 * Sorting inside channel:
@@ -126,7 +126,7 @@ This project is built as a **capstone-level real-world application**, closely mi
 
 ---
 
-### 🧠 Seed Data (Development)
+###  Seed Data (Development)
 
 * Multiple users
 * Multiple channels
@@ -140,7 +140,7 @@ This project is built as a **capstone-level real-world application**, closely mi
 
 ---
 
-### 📱 Responsive Design
+###  Responsive Design
 
 * Desktop
 * Tablet (iPad, iPad Pro)
@@ -152,7 +152,7 @@ This project is built as a **capstone-level real-world application**, closely mi
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Frontend
 
@@ -173,7 +173,7 @@ This project is built as a **capstone-level real-world application**, closely mi
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 youclone/
@@ -227,7 +227,7 @@ youclone/
 
 ---
 
-## ⚙️ Environment Variables
+## Environment Variables
 
 Create a `.env` file in `backend/`:
 
@@ -239,9 +239,9 @@ PORT=5000
 
 ---
 
-## ▶️ Running the Project
+## Running the Project
 
-### 1️⃣ Backend Setup
+### Backend Setup
 
 ```bash
 cd backend
@@ -249,13 +249,13 @@ npm install
 npm run dev
 ```
 
-### 2️⃣ Seed Database
+###  Seed Database
 
 ```bash
 node seed.js
 ```
 
-### 3️⃣ Frontend Setup
+### Frontend Setup
 
 ```bash
 cd frontend
@@ -277,7 +277,7 @@ http://localhost:5000
 
 ---
 
-## 📡 API Endpoints (Summary)
+## API Endpoints (Summary)
 
 ### Auth
 
@@ -307,7 +307,7 @@ http://localhost:5000
 
 ---
 
-## ✅ Capstone Requirements Covered
+##  Capstone Requirements Covered
 
 ✔ Authentication
 ✔ CRUD operations
@@ -321,7 +321,7 @@ http://localhost:5000
 
 ---
 
-## 📌 Future Enhancements
+## Future Enhancements
 
 * Subscriptions system
 * Watch history
@@ -333,7 +333,7 @@ http://localhost:5000
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
 **Mandala Bhavani Shankar**
 Full-Stack Developer (React | Node | MongoDB)
