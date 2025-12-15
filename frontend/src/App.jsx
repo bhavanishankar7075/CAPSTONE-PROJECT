@@ -14,21 +14,16 @@ import API from "./api/axios";
 
 export default function App() {
   const dispatch = useDispatch();
-  
-  // FIX 1: Initialize state from localStorage. 
-  // Reads "sidebarOpen" value from localStorage, defaults to true if not found/error.
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     try {
       const storedValue = localStorage.getItem("sidebarOpen");
-      // Default to true if not explicitly set (first time user), otherwise use stored boolean
-      return storedValue !== null ? JSON.parse(storedValue) : true; 
+      return storedValue !== null ? JSON.parse(storedValue) : true;
     } catch (error) {
       console.error("Error reading sidebar state from localStorage", error);
       return true; // Default to opened on error
     }
   });
 
-  // FIX 2: Update localStorage when the sidebar state changes.
   const toggleSidebar = () => {
     setSidebarOpen((prev) => {
       const newState = !prev;
