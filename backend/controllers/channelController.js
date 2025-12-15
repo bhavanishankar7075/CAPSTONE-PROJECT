@@ -7,51 +7,6 @@ import Video from "../models/Video.js";
  * Create a channel (protected)
  * POST /api/channels
  */
-/* export const createChannel = async (req, res) => {
-  try {
-    const { channelName, description = "", channelBanner = "" } = req.body;
-    if (!channelName || !channelName.trim()) {
-      return res.status(400).json({ message: "Channel name required" });
-    }
-
-    if (!req.user || !(req.user.id || req.user._id)) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    const ownerId = req.user.id || req.user._id;
-
-    // prevent creating multiple channels with same name for same owner (optional)
-    const existing = await Channel.findOne({ owner: ownerId, channelName: channelName.trim() });
-    if (existing) {
-      return res.status(409).json({ message: "You already have a channel with that name" });
-    }
-
-    const channel = new Channel({
-      channelName: channelName.trim(),
-      owner: ownerId,
-      description: description.trim(),
-      channelBanner: channelBanner || ""
-    });
-
-    await channel.save();
-
-    // push channel into user's channels array
-    await User.findByIdAndUpdate(ownerId, { $push: { channels: channel._id } }).catch((e) => {
-      console.error("Warning: failed to add channel id to user:", e);
-    });
-
-    const populated = await Channel.findById(channel._id).populate("owner", "username avatar");
-
-    return res.status(201).json(populated);
-  } catch (err) {
-    console.error("createChannel error:", err);
-    return res.status(500).json({ message: "Server error while creating channel" });
-  }
-}; */
-
-
-
-
-
 export const createChannel = async (req, res) => {
   try {
     const { channelName, description = "", channelBanner = "" } = req.body;
@@ -97,20 +52,6 @@ export const createChannel = async (req, res) => {
     return res.status(500).json({ message: "Server error while creating channel" });
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Get channel by id and populate videos + owner
