@@ -222,6 +222,7 @@ youclone/
 Create a `.env` file inside `backend/`:
 
 ```env
+Note: Create a .env file in the backend directory using the provided .env.example file.
 MONGO_URI=mongodb://localhost:27017/youclone
 JWT_SECRET=your_jwt_secret
 PORT=5000
