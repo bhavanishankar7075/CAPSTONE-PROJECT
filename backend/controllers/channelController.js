@@ -20,7 +20,7 @@ export const createChannel = async (req, res) => {
 
     const ownerId = req.user.id || req.user._id;
 
-    // ✅ FIX: prevent more than one channel per user
+    // FIX: prevent more than one channel per user
     const existingChannel = await Channel.findOne({ owner: ownerId });
     if (existingChannel) {
       return res.status(409).json({
